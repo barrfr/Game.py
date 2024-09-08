@@ -26,7 +26,7 @@ class UpThrustBoard():
             3: 'G',
             4: 'Y'
             }
-        self.Board1 = [["", "", "", ""], 
+        self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
                       ["", "", "", ""],
@@ -55,7 +55,7 @@ class UpThrustBoard():
     
     def isFurthestForwads(self, char, InputX, InputY1):
         a = 0
-        for row in self.Board1:
+        for row in self.Board:
             for i in range(len(row)):
                 if row[i] == char and i != InputX and row > InputY1:
                     a += 1
@@ -69,7 +69,7 @@ class UpThrustBoard():
     
     #have something that checks the validity of a move (to be called upon later)
     def legalmove(self, InputX, InputY1, InputY2):
-        if self.Board1[InputY2][InputX] == "" and self.Board1[InputY1][InputX] != "" and self.isFurthestForwards(self.Board1[InputY1][InputX], InputX, InputY1) and self.playerColour[self.game['turn']] == self.Board1[InputY1][InputX]:
+        if self.Board[InputY2][InputX] == "" and self.Board[InputY1][InputX] != "" and self.isFurthestForwards(self.Board[InputY1][InputX], InputX, InputY1) and self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]:
                 return True
         else:
             return False
@@ -83,14 +83,14 @@ class UpThrustBoard():
             InputX -= 1
             InputY1 = 10 - InputY1
             InputY2 = 10 - InputY2
-            self.Board1[InputY2][InputX] = self.Board1[InputY1][InputX]
-            self.Board1[InputY1][InputX] = ""
+            self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
+            self.Board[InputY1][InputX] = ""
 
 #have something that reverses moves
 #have a list of moves, and draw upon the last move that was made
     def RetractMove(self, InputX, InputY1, InputY2):
-        self.Board1[self.moves[9][0]][self.moves[9][1]] = self.Board1[self.moves[9][2]][self.moves[9][1]] 
-        self.Board1[self.moves[9][2]][self.moves[9][1]] = ""
+        self.Board[self.moves[9][0]][self.moves[9][1]] = self.Board[self.moves[9][2]][self.moves[9][1]] 
+        self.Board[self.moves[9][2]][self.moves[9][1]] = ""
         
 
 
