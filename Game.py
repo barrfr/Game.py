@@ -52,6 +52,9 @@ class UpThrustBoard():
         
         if self.playerCount == 2:
             self.game['turn'] = 3 - self.game['turn'] 
+
+    def getBoard(self):
+        return self.Board
     
     def numberOfPiecesInLane(self, InputX, InputY1, InputY2):
         counter = 4
