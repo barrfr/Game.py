@@ -148,6 +148,7 @@ class UpThrustBoard():
         else:
             return False
         
+        """
     def __repr__(self, Board):
         # return a nicely formatted string for displaying the board on the console
         s = ' '.join(map(str, range(Board.COLS))) + '\n'
@@ -155,7 +156,8 @@ class UpThrustBoard():
             outputrow = [Board.SYMBOLS[piece] for piece in row]
             s += ' '.join(outputrow) + '\n'
         return s
-                
+               """ 
+    """
     def runGame(self, Board):
         run = True
         not_answered = True
@@ -181,7 +183,4 @@ class UpThrustBoard():
                     not_answered = False
             #makes it the next players turn
             self.CycleThruPlayerTurns()
-
-game = UpThrustBoard()
-game.runGame(game.Board)
-            
+"""
