@@ -8,11 +8,11 @@ pygame.init()
 
 class Button():
     def __init__(self, x, y, image, scale):
-    """
-    creates a button at the x and y coordinates given,
-    it puts the image you enter as a parameter as the button itself,
-    and the scale allows you to tweak the size of the button as often, the images are of nonuniform size
-    """
+        """
+        creates a button at the x and y coordinates given,
+        it puts the image you enter as a parameter as the button itself,
+        and the scale allows you to tweak the size of the button as often, the images are of nonuniform size
+        """
         width = image.get_width()
         height = image.get_height()
         self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
@@ -71,13 +71,13 @@ start_img_circle = pygame.image.load("Start_Button_Circle.png").convert_alpha()
 grey_img = pygame.image.load("Grey_Square.png").convert_alpha()
 
 #menu sprites
-menu_start_img = pygame.image.load("Start_Button.png").convert_alpha()
-menu_exit_img = pygame.image.load("Exit_Button.png").convert_alpha()
+menu_start_img = pygame.image.load("Start_Button.PNG").convert_alpha()
+menu_exit_img = pygame.image.load("Exit_Button.PNG").convert_alpha()
 
 #play sprites
-play_start_img = pygame.image.load("Saw_Icon.png").convert_alpha()
+play_board_img = pygame.image.load("UpThrust_Board.png").convert_alpha()
 play_exit_img = pygame.image.load("Small Exit.png").convert_alpha()
-play_saw_img = pygame.image.load("Saw_Icon.png").convert_alpha()
+
 
 
 def play():
