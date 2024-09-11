@@ -19,12 +19,12 @@ class View():
     #drawing the columns
     for column in range(1,4):
       """line(surface, color, start_pos, end_pos)"""
-      pygame.draw.line(screen, black, (row * SCREEN_HEIGHT/11, 0), (row * SCREEN_HEIGHT/11, SCREEN_WIDTH))
+      pygame.draw.line(screen, black, (row * SCREEN_HEIGHT/4, 0), (row * SCREEN_HEIGHT/4, SCREEN_WIDTH))
 
     #drawing the pieces
     for i in range(6, 11):
       """circle(surface, color, center, radius)"""
-      pygame.draw.circle(screen, white, )
+      pygame.draw.circle(screen, white, ((i-0.5) * SCREEN_WIDTH/11, 0), ((i-0.5) * SCREEN_HEIGHT/4, SCREEN_WIDTH))
 
   def game(self):
     pass
