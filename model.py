@@ -94,10 +94,7 @@ class UpThrustBoard():
             self.numberOfPiecesInLane(InputX, InputY1, InputY2) == InputY1 - InputY2 and 
             self.matchingColours(self.Board[InputY1][InputX], InputX, InputY2) and 
             self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]):
-            
-            print(2)
                 
-            
             return True
         else:
             return False

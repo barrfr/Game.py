@@ -42,6 +42,9 @@ class Button():
         return action
     
 class Photo():
+    """
+    same as class Button()
+    """
     def __init__(self, x, y, image, scale):
         width = image.get_width()
         height = image.get_height()
@@ -68,7 +71,7 @@ screen.fill((background))
 
 start_img_circle = pygame.image.load("Start_Button_Circle.png").convert_alpha()
 
-grey_img = pygame.image.load("Grey_Square.png").convert_alpha()
+#grey_img = pygame.image.load("Grey_Square.png").convert_alpha()
 
 #menu sprites
 menu_start_img = pygame.image.load("Start_Button.PNG").convert_alpha()
@@ -76,8 +79,7 @@ menu_exit_img = pygame.image.load("Exit_Button.PNG").convert_alpha()
 
 #play sprites
 play_board_img = pygame.image.load("UpThrust_Board.png").convert_alpha()
-play_exit_img = pygame.image.load("Small Exit.png").convert_alpha()
-
+play_exit_img = pygame.image.load("Exit_Button.PNG").convert_alpha()
 
 
 def play():
@@ -85,8 +87,8 @@ def play():
     pygame.display.set_caption("Play")
     
     small_exit_button = Button(0, 500, play_exit_img, 0.2)
-    pygame.Surface.blit(screen, grey_img, (0, 0))
-    saw_photo = Photo(250, 100, play_saw_img, 0.2)
+    #pygame.Surface.blit(screen, grey_img, (0, 0))
+    saw_photo = Photo(250, 100, play_board_img, 0.2)
     
     #programming the exit button
     while run:
@@ -100,7 +102,7 @@ def play():
 def main_menu():
     global active_box
     global run
-    pygame.Surface.blit(screen, grey_img, (0, 0))
+    #pygame.Surface.blit(screen, grey_img, (0, 0))
     pygame.display.set_caption("Menu")
     
     start_button = Button(250, 100, menu_start_img, 0.2)
