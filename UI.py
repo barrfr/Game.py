@@ -8,6 +8,11 @@ pygame.init()
 
 class Button():
     def __init__(self, x, y, image, scale):
+    """
+    creates a button at the x and y coordinates given,
+    it puts the image you enter as a parameter as the button itself,
+    and the scale allows you to tweak the size of the button as often, the images are of nonuniform size
+    """
         width = image.get_width()
         height = image.get_height()
         self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
@@ -17,9 +22,12 @@ class Button():
         
     def ClickedOn(self, surface):
         action = False
-        
+        """
+        if the position of the mouse is within the button, 
+        and if the mouse button 1 (0 basically) is pressed,
+        clicked = true
+        """
         mouse_pos = pygame.mouse.get_pos()
-
         if self.rect.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
