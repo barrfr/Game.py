@@ -3,7 +3,7 @@ import UpModel
 
 run = True
 
-
+InvBoard = Board[::-1]
 
 pygame.init
 
@@ -21,6 +21,12 @@ class View:
   def __init__(self, model):
     self.model = model
 
+  def get_board(self): # for toher functions to get x and y, write a geta function as on topic 1 on the slides
+    for i in range(len(InvBoard)):
+      for j in range(len(i[::-1])):
+        y = SCREEN_HEIGHT - (SCREEN_HEIGHT/11)*i + SCREEN_HEIGHT/22
+        x = SCREEN_WIDTH - (SCREEN_WIDTH/4)*j - SCREEN_WIDTH/8
+
   def drawBoard(self):
 
     screen.fill(white)
@@ -37,7 +43,7 @@ class View:
       pygame.draw.line(screen, black, (column * SCREEN_WIDTH/4, 0), (column * SCREEN_WIDTH/4, SCREEN_HEIGHT))
 
     #drawing the pieces
-    UpModel.UpThrustBoard.getBoard()
+    
     for i in range(0, 5):
       y = SCREEN_HEIGHT - (i * SCREEN_HEIGHT/11 - SCREEN_HEIGHT/22)
       x = (i * SCREEN_WIDTH/4 - SCREEN_WIDTH/8)
