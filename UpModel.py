@@ -36,7 +36,7 @@ class UpThrustBoard():
                       ["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""],
-                      ["", "", "", ""],]
+                      ["", "", "", ""]]
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
             if self.game['turn'] == 4:
