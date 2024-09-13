@@ -26,17 +26,17 @@ class UpThrustBoard():
             3: 'G',
             4: 'Y'
             }
-        self.Board = [["G", "Y", "B", "R"], 
-                      ["Y", "B", "R", "G"],
-                      ["B", "R", "G", "Y"], 
-                      ["R", "G", "Y", "B"],
+        self.Board = [["", "", "", ""], 
+                      ["", "", "", ""],
                       ["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
+                      ["", "", "", ""],
                       ["", "", "", ""], 
-                      ["", "", "", ""],
-                      ["", "", "", ""],
-                      ["", "", "", ""]]
+                      ["B", "Y", "G", "R"], 
+                      ["Y", "G", "R", "B"],
+                      ["G", "R", "B", "Y"],
+                      ["R", "B", "Y", "G"]]
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
             if self.game['turn'] == 4:
@@ -104,10 +104,10 @@ class UpThrustBoard():
     def MakeMove(self, InputX, InputY1, InputY2):
         if self.legalmove(InputX, InputY1, InputY2):
             
-            print('MAKEMOVE')
+            
             self.moves.append([InputY1, InputX, InputY2])
             self.moves.pop(0)
-            print(self.moves)
+            print(self.Board)
             '''
             InputX -= 1
             InputY1 = 10 - InputY1
@@ -157,7 +157,7 @@ class UpThrustBoard():
             s += ' '.join(outputrow) + '\n'
         return s
                """ 
-    """
+    
     def runGame(self, Board):
         run = True
         not_answered = True
@@ -184,7 +184,7 @@ class UpThrustBoard():
             #makes it the next players turn
             self.CycleThruPlayerTurns()
 
-
+"""
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
@@ -197,5 +197,5 @@ while run:
   view = View
   view.drawBoard()
 
-
 """
+

@@ -4,9 +4,7 @@ import UpModel
 
 
 class Controller:
-    def __init__(self, model, view):
-        self.model = model
-        self.view = view
+    def __init__(self):
         self.running = True
 
     def event_manager(self):

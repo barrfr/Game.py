@@ -29,8 +29,8 @@ class View:
     self.drawBoard()
     for i, character in enumerate(invboard):
       for j, char in enumerate(character[::-1]):
-        self.__y = SCREEN_HEIGHT - (SCREEN_HEIGHT/11)*i + SCREEN_HEIGHT/22
-        self.__x = SCREEN_WIDTH - (SCREEN_WIDTH/4)*j - SCREEN_WIDTH/8
+        self.__y = SCREEN_HEIGHT - (SCREEN_HEIGHT/11)*i + SCREEN_HEIGHT/22 - SCREEN_HEIGHT/11
+        self.__x = SCREEN_WIDTH - (SCREEN_WIDTH/4)*j - SCREEN_WIDTH/8 
         element = char
         self.draw_pieces(self.__x, self.__y, char) 
 
