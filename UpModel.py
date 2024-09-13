@@ -107,7 +107,7 @@ class UpThrustBoard():
             
             self.moves.append([InputY1, InputX, InputY2])
             self.moves.pop(0)
-            print(self.Board)
+            
             '''
             InputX -= 1
             InputY1 = 10 - InputY1
@@ -115,6 +115,7 @@ class UpThrustBoard():
             '''
             self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
             self.Board[InputY1][InputX] = ""
+            print(self.Board)
 
 #have something that reverses moves
 #have a list of moves, and draw upon the last move that was made

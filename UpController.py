@@ -9,5 +9,5 @@ class Controller:
 
     def event_manager(self):
         for event in pygame.event.get():
-            if event.type == pygame. QUIT:
+            if event.type == pygame.QUIT:
                 self.running = False
