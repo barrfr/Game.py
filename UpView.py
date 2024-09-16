@@ -77,5 +77,5 @@ class View:
       """line(surface, color, start_pos, end_pos)"""
       pygame.draw.line(screen, black, (column * SCREEN_WIDTH/4, 0), (column * SCREEN_WIDTH/4, SCREEN_HEIGHT))
 
-    #drawing the pieces
+    
     

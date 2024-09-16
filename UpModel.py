@@ -94,7 +94,7 @@ class UpThrustBoard():
             self.numberOfPiecesInLane(InputX, InputY1, InputY2) == InputY1 - InputY2 and 
             self.matchingColours(self.Board[InputY1][InputX], InputX, InputY2) and 
             self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]):
-                
+            print(2)
             return True
         else:
             return False
@@ -102,19 +102,18 @@ class UpThrustBoard():
 
     #have something that makes moves 
     def MakeMove(self, InputX, InputY1, InputY2):
-        if self.legalmove(InputX, InputY1, InputY2):
-            
-            
-            self.moves.append([InputY1, InputX, InputY2])
-            self.moves.pop(0)
-            print(self.Board)
-            '''
-            InputX -= 1
-            InputY1 = 10 - InputY1
-            InputY2 = 10 - InputY2
-            '''
-            self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
-            self.Board[InputY1][InputX] = ""
+        
+        self.moves.append([InputY1, InputX, InputY2])
+        self.moves.pop(0)
+        print(self.Board)
+        '''
+        InputX -= 1
+        InputY1 = 10 - InputY1
+        InputY2 = 10 - InputY2
+        '''
+        self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
+        self.Board[InputY1][InputX] = ""
+        print(self.Board)
 
 #have something that reverses moves
 #have a list of moves, and draw upon the last move that was made
