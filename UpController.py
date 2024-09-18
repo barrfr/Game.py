@@ -31,13 +31,3 @@ class Controller:
                             else:
                                 if ClickTwo(pygame.mouse.get_pos) == True:
                                     MakeMove(click_1_x, click_1_y, j)
-                                
-
-                            
-
-        """
-        #isomething that takes a click and takes its position
-            elif event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-        """
-

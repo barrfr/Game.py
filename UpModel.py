@@ -214,18 +214,5 @@ class UpThrustBoard():
             #makes it the next players turn
             self.CycleThruPlayerTurns()
 
-"""
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-
-View = View(model)
-pygame.display.set_caption("Menu")
-
-while run:
-  pygame.display.update()
-  screen.fill(red)
-  view = View
-  view.drawBoard()
-
-"""
 
