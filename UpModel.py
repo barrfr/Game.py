@@ -2,7 +2,7 @@
 class UpThrustBoard():
     
     def __init__(self):
-        
+        Clicked = False
         
         
         self.playerCount = 4
@@ -17,6 +17,7 @@ class UpThrustBoard():
                       [0, 0, 0], 
                       [0, 0, 0]]
         self.game = {
+            'GAMEOVER' : False,
             'winner': None,
             'turn': 1
             }
@@ -149,6 +150,34 @@ class UpThrustBoard():
         else:
             return False
         
+    def ClickOne(self, pos):
+        Clicked = True
+        click_1_x = pos[0] // (SCREEN_HEIGHT // 4)
+        click_1_y = pos[1] // (SCREEN_HEIGHT // 11)
+
+    def ClickTwo(self, pos):
+        Clicked = False
+        i = pos[0] // (SCREEN_HEIGHT // 4)
+        j = pos[1] // (SCREEN_HEIGHT // 11)
+        if i == self.ClickOne.click_1_x and j == self.ClickOne.click_1_y:
+            return Clicked
+
+        return True
+
+
+    def ResetBoard(self):
+        self.Board = [["", "", "", ""], 
+                      ["", "", "", ""],
+                      ["", "", "", ""], 
+                      ["", "", "", ""],
+                      ["", "", "", ""], 
+                      ["", "", "", ""],
+                      ["", "", "", ""], 
+                      ["B", "Y", "G", "R"], 
+                      ["Y", "G", "R", "B"],
+                      ["G", "R", "B", "Y"],
+                      ["R", "B", "Y", "G"]]
+
         """
     def __repr__(self, Board):
         # return a nicely formatted string for displaying the board on the console
