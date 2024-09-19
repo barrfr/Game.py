@@ -177,16 +177,6 @@ class UpThrustBoard():
                       ["Y", "G", "R", "B"],
                       ["G", "R", "B", "Y"],
                       ["R", "B", "Y", "G"]]
-
-        """
-    def __repr__(self, Board):
-        # return a nicely formatted string for displaying the board on the console
-        s = ' '.join(map(str, range(Board.COLS))) + '\n'
-        for row in self.__position[::-1]:
-            outputrow = [Board.SYMBOLS[piece] for piece in row]
-            s += ' '.join(outputrow) + '\n'
-        return s
-               """ 
     
     def runGame(self, Board):
         run = True

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     model = UpModel.UpThrustBoard()
     view = UpView.View(model)
     controller = UpController.Controller(model, view)
-    view.draw_menu
+    view.draw_menu()
 
-while controller.running:
-    controller.event_manager()
+    while controller.running:
+        controller.event_manager()
