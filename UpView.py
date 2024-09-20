@@ -27,13 +27,16 @@ class View():
     
 
   def draw_board(self):
+    self.screen.fill(white)
     self.drawGrid() 
     for i, character in enumerate(self.invboard):
       for j, char in enumerate(character[::-1]):
         self.__y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
         self.__x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
         self.draw_pieces(self.__x, self.__y, char)
-        pygame.screen.update()
+        pygame.display.update()
+        
+    print("screen just updated boss")
     
 
   def draw_menu(self):
@@ -87,8 +90,9 @@ class View():
     for column in range(1,4):
       """line(surface, color, start_pos, end_pos)"""
       pygame.draw.line(self.screen, black, (column * self.SCREEN_WIDTH/4, 0), (column * self.SCREEN_WIDTH/4, self.SCREEN_HEIGHT))
-
-    self.screen.update()
+    pygame.display.update()
+      
+    
 
 class Button():
     def __init__(self, x, y, image, scale, surface):

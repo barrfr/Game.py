@@ -23,13 +23,16 @@ class Controller:
                     "Board drawn"
                     self.menu_screen = False 
                 else:
-                    if self.game["GAMEOVER"] == True: #if the game is over
+                    if self.model.game["GAMEOVER"] == True: #if the game is over
                         self.model.ResetBoard() # reset the board and go back to start screen
                         self.menu_screen = True
                         self.view.draw_menu()
                     else:
-                        if UpController.Clicked == False:
-                            ClickOne(pygame.mouse.get_pos)
+                        if self.model.Clicked == False:
+                            self.model.ClickOne(pygame.mouse.get_pos())
                         else:
-                            if ClickTwo(pygame.mouse.get_pos) == True:
-                                MakeMove(click_1_x, click_1_y, j)
+                            print("hoo")
+                            if self.model.IsClickTwoEqualToClickOne(pygame.mouse.get_pos()) == False:
+                                self.model.Clicked = False
+                                self.model.MakeMove(self.model.click_1_x, self.model.click_1_y, self.model.j)
+                                self.view.draw_board()

@@ -2,9 +2,11 @@
 class UpThrustBoard():
     
     def __init__(self):
-        Clicked = False
-        
-        
+        self.Clicked = False
+        self.click_1_x = 0
+        self.click_1_y = 0
+        self.j = 0
+
         self.playerCount = 4
         self.moves = [[0, 0, 0], 
                       [0, 0, 0], 
@@ -117,6 +119,7 @@ class UpThrustBoard():
             self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
             self.Board[InputY1][InputX] = ""
             print(self.Board)
+            self.CycleThruPlayerTurns()
 
 #have something that reverses moves
 #have a list of moves, and draw upon the last move that was made
@@ -151,18 +154,22 @@ class UpThrustBoard():
             return False
         
     def ClickOne(self, pos):
-        Clicked = True
-        click_1_x = pos[0] // (SCREEN_HEIGHT // 4)
-        click_1_y = pos[1] // (SCREEN_HEIGHT // 11)
+        print("woo")
+        self.Clicked = True
+        self.click_1_x = pos[0] // (300 // 4)
+        self.click_1_y = pos[1] // (550 // 11)
+        print(pos)
+        print(self.click_1_x, self.click_1_y)
+        print(self.Clicked)
 
-    def ClickTwo(self, pos):
+    def IsClickTwoEqualToClickOne(self, pos):
         Clicked = False
-        i = pos[0] // (SCREEN_HEIGHT // 4)
-        j = pos[1] // (SCREEN_HEIGHT // 11)
-        if i == self.ClickOne.click_1_x and j == self.ClickOne.click_1_y:
-            return Clicked
+        i = pos[0] // (300 // 4)
+        self.j = pos[1] // (550 // 11)
+        if i == self.click_1_x and self.j == self.click_1_y:
+            return True
 
-        return True
+        return False
 
 
     def ResetBoard(self):
