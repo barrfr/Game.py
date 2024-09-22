@@ -23,7 +23,7 @@ class View():
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     self.start_img = pygame.image.load('Start_Button.PNG').convert_alpha()
     self.run = True
-    self.invboard = UpThrustBoard().Board[::-1]
+    self.invboard = model.Board[::-1]
     
 
   def draw_board(self):
@@ -31,10 +31,10 @@ class View():
     self.drawGrid() 
     for i, character in enumerate(self.invboard):
       for j, char in enumerate(character[::-1]):
-        self.__y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
-        self.__x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
-        self.draw_pieces(self.__x, self.__y, char)
-        pygame.display.update()
+        y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
+        x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
+        self.draw_pieces(x, y, char)
+    pygame.display.update()
         
     print("screen just updated boss")
     
@@ -47,8 +47,6 @@ class View():
     pygame.display.update()
 
   def draw_pieces(self, x, y, character):
-    self.__x = x
-    self.__y = y
 
     """circle(surface, color, center, radius)"""
     if character == 'R':

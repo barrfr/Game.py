@@ -42,19 +42,17 @@ class UpThrustBoard():
                       ["R", "B", "Y", "G"]]
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
-            if self.game['turn'] == 4:
-                self.game['turn'] = 1
-            else: 
-                self.game['turn'] += 1
+            (self.game['turn']+1)%4
                 
         if self.playerCount == 3:
-            if self.game['turn'] == 3:
-                self.game['turn'] = 1
-            else: 
-                self.game['turn'] += 1
+            (self.game['turn']+1)%3
         
         if self.playerCount == 2:
-            self.game['turn'] = 3 - self.game['turn'] 
+            (self.game['turn']+1)%2
+
+    def ChangeColour(self):
+        pass
+
 
     def getBoard(self):
         return self.Board
