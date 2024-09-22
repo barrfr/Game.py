@@ -2,7 +2,7 @@ import UpModel
 import UpView
 import UpController
 import pygame
-pygame.init
+pygame.init()
 not_answered = True
 
 if __name__ == "__main__":
