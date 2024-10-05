@@ -14,6 +14,12 @@ red = [255, 0, 0]
 class View():
 
   def __init__(self, model, x=0, y=0):
+    self.blue = [0, 0, 255]
+    self.green = [0, 255, 0]
+    self.yellow = [255, 255, 0]
+    self.black = [0, 0, 0]
+    self.white = [255, 255, 255]
+    self.red = [255, 0, 0]
     self.__x = x
     self.__y = y
     self.model = model
@@ -24,29 +30,47 @@ class View():
     self.start_img = pygame.image.load('Start_Button.PNG').convert_alpha()
     self.run = True
     self.invboard = model.Board[::-1]
-    
+    self.playerColour = {
+            1: red,
+            2: blue,
+            3: green,
+            0: yellow
+            }
 
-  def draw_board(self):
+  
+  def BarColouration(self, color=0):
+    color = self.playerColour[self.model.game['turn']]
+    return color
+
+  """ 
+  def BarAtTheTop(self):
+    color = self.BarColouration()
+    "rect(surface, color, pos)"
+    pygame.draw.polygon(self.screen, color, [(0, 0), (300, 0), (300, 25), (0, 25)])
+  """
+
+  def DrawBoard(self):
     self.screen.fill(white)
-    self.drawGrid() 
+    self.DrawGrid() 
+    #self.BarAtTheTop()
     for i, character in enumerate(self.invboard):
       for j, char in enumerate(character[::-1]):
         y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
         x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
-        self.draw_pieces(x, y, char)
+        self.DrawPieces(x, y, char)
     pygame.display.update()
         
     print("screen just updated boss")
     
 
-  def draw_menu(self):
+  def DrawMenu(self):
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
     start_button = Button(50, 50, self.start_img, 0.1, self.screen)
     
     pygame.display.update()
 
-  def draw_pieces(self, x, y, character):
+  def DrawPieces(self, x, y, character):
 
     """circle(surface, color, center, radius)"""
     if character == 'R':
@@ -62,32 +86,33 @@ class View():
       pygame.draw.circle(self.screen, yellow, (x, y), 10)
 
 
-  def get_y(self): 
+  def GetY(self): 
     return self.__y
-  def set_y(self, y):
+  def SetY(self, y):
     self.__y = y
 
-  def get_x(self):
+  def GetX(self):
     return self.__x
-  def set_x(self, x):
+  def SetX(self, x):
     self.__x = x
 
   def ConvertMouseLoc(self, location, row=0, coloumn=0):
     row = location[0] // (self.SCREEN_WIDTH // 4)
     coloumn = location[0] // (self.SCREEN_WIDTH // 11)
 
-  def drawGrid(self):
+  def DrawGrid(self):
+    color = self.BarColouration()
 
     #drawing the rows
     for row in range(1, 11):
       """line(surface, color, start_pos, end_pos)"""
-      pygame.draw.line(self.screen, black, (0, row * self.SCREEN_HEIGHT/11), (self.SCREEN_WIDTH, row * self.SCREEN_HEIGHT/11))
+      pygame.draw.line(self.screen, color, (0, row * self.SCREEN_HEIGHT/11), (self.SCREEN_WIDTH, row * self.SCREEN_HEIGHT/11))
     
     
     #drawing the columns
     for column in range(1,4):
       """line(surface, color, start_pos, end_pos)"""
-      pygame.draw.line(self.screen, black, (column * self.SCREEN_WIDTH/4, 0), (column * self.SCREEN_WIDTH/4, self.SCREEN_HEIGHT))
+      pygame.draw.line(self.screen, color, (column * self.SCREEN_WIDTH/4, 0), (column * self.SCREEN_WIDTH/4, self.SCREEN_HEIGHT))
     pygame.display.update()
       
     
