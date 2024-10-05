@@ -31,10 +31,24 @@ class Controller:
                             self.model.ClickOne(pygame.mouse.get_pos())
                         else:
                             print("hoo")
-                            if self.model.IsClickTwoEqualToClickOne(pygame.mouse.get_pos()) == False:
-                                self.model.Clicked = False
-                                self.model.MakeMove(self.model.click_1_x, self.model.click_1_y, self.model.j)
-                                self.view.DrawBoard()
+                            if self.model.PlayerIsHuman():
+                                if self.model.IsClickTwoEqualToClickOne(pygame.mouse.get_pos()) == False: #if move is legal then make it
+                                    self.model.Clicked = False
+                                    self.model.MakeMove(self.model.click_1_x, self.model.click_1_y, self.model.j)
+                                    self.view.DrawBoard()
+                            elif self.model.AiPlayers[self.model.playerColour[self.model.game['turn']]] and self.model.game['GAMEOVER'] == False: #if player isnt human and current palyer is an AI and game isnt over
+                                self.model.MakeMove(self.ConvertMinimaxToInputs()) #gets CPU move and makes it
 
-                                model.game['turn']
+    def ConvertMinimaxToInputs(self):
+        InputX, InputY1, InputY2 = None, None, None
+        evaluation, pos = self.model.Minimax(self.model.Board, 5, float ['-inf'], float ['inf'], False)
+        for row in self.model.Board:
+            for coloumn in self.model.Board[row]:
+                if self.model.Board[row][coloumn] != pos[row][coloumn]:
+                    if self.model.Board[row][coloumn] == "":
+                        row, coloumn = InputY1, InputX
+                    elif self.model.Board[row][coloumn] != "":
+                        row = InputY2
+        return InputX, InputY1, InputY2
+
 

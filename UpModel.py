@@ -37,7 +37,7 @@ class UpThrustBoard():
         #row = ['' for i in range(4)]
         #board = [row for i in range(7)]
         #board += [lst[:i] + lst[i:] for i in range(4)]
-        AiPlayers = {1:False, 2:False, 3:False, 4:False}
+        self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
 
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
@@ -210,18 +210,18 @@ class UpThrustBoard():
 
         return False
 
-    def FindY2(self, InputX, InputY1):
+    def FindY2(self, InputY1, board):
         number_of_pieces_in_row = 0
-        for char in Board[InputY1]:
+        for char in self.Board[InputY1]:
             if char != "":
                 number_of_pieces_in_row += 1
         return (InputY1 - number_of_pieces_in_row)
 
     def GetChildren(self, position):
         minimoves = []
-        for row in self.Board:
+        for row in position:
             for element in row:
-                y2 = self.FindY2(element, row)
+                y2 = self.FindY2(row, position)
                 if self.LegalMove(element, row, y2):
                     Board2 = position
                     #checks if everythings legal
@@ -234,12 +234,11 @@ class UpThrustBoard():
         self.Board2[InputY1][InputX] == ""
 
     def Minimax(self, position, depth, alpha, beta, maximisingPlayer):
-        if depth == 0 or model.GameOver():
-            return self.evaluate(position), position
-            
-#where is the point in here where the best move is stored so that I can pull it
+        if depth == 0 or self.GameOver():
+            return position
+            #where is the point in here where the best move is stored so that I can pull it
         if maximisingPlayer:
-            maxEval = -999
+            max_eval = -999
             for child in self.GetChildren(position):
                 eval = self.Minimax(child, depth - 1, float ['-inf'], float ['inf'], False)[0]
                 max_eval = max(max_eval, eval) #because it isnt self.max_eval, isnt maxeval just -999 every single time because max eval is local
@@ -249,7 +248,7 @@ class UpThrustBoard():
             return [max_eval, position]
         
         else:
-            minEval = 999
+            min_eval = 999
             for child in self.GetChildren(position):
                 eval = self.Minimax(child, depth - 1, float ['-inf'], float ['inf'], True)[0]
                 min_eval = min(min_eval, eval)
@@ -262,9 +261,9 @@ class UpThrustBoard():
         for row in position:
             for char in row:
                 if char == MaxPiece:
-                    score += BoardScore[row][char]
+                    score += self.BoardScore[row][char]
                 elif char == MinPiece:
-                    score -= BoardScore[row][char]
+                    score -= self.BoardScore[row][char]
         
         return score
 
@@ -282,15 +281,18 @@ class UpThrustBoard():
                       ["R", "B", "Y", "G"]]
 
     def evaluate(self, board, score=0):
-        for row in Board:
+        for row in self.Board:
             for char in row:
-                if char == "R" or char== "G":
+                if char != "" and char != "Y":
                     score += self.BoardScore[row]
                 elif char == "B" or char== "Y":
                     score -= self.BoardScore[row]
-    
-    def ReturnBestMove(self):
-        return self.Minimax(self.Board, depth - 1, float ['-inf'], float ['inf'], self.GetMaximisingPlayer)
+
+    def PlayerIsHuman(self):
+        if self.AiPlayers[self.mplayerColour[self.game['turn']]] == False: #if current player is AI
+            return False
+        return True
+        
         
 
                         
