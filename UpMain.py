@@ -6,6 +6,7 @@ pygame.init()
 not_answered = True
 
 if __name__ == "__main__":
+    print("game ran")
     model = UpModel.UpThrustBoard()
     view = UpView.View(model)
     controller = UpController.Controller(model, view)

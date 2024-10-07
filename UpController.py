@@ -15,9 +15,7 @@ class Controller:
                 print("quitted")
                 self.running = False
             if pygame.mouse.get_pressed()[0] == True:
-                print("mouse 1 pressed")
                 if self.menu_screen: # if on start screen
-                    print("ur on the menu screen")
                     self.view.DrawBoard() #start the game
                     "Board drawn"
                     self.menu_screen = False 
@@ -30,25 +28,38 @@ class Controller:
                         if self.model.Clicked == False:
                             self.model.ClickOne(pygame.mouse.get_pos())
                         else:
-                            print("hoo")
                             if self.model.PlayerIsHuman():
+                                print("Human player moving")
                                 if self.model.IsClickTwoEqualToClickOne(pygame.mouse.get_pos()) == False: #if move is legal then make it
                                     self.model.Clicked = False
                                     self.model.MakeMove(self.model.click_1_x, self.model.click_1_y, self.model.j)
                                     self.view.DrawBoard()
-                            elif self.model.AiPlayers[self.model.playerColour[self.model.game['turn']]] and self.model.game['GAMEOVER'] == False: #if player isnt human and current palyer is an AI and game isnt over
-                                self.model.MakeMove(self.ConvertMinimaxToInputs()) #gets CPU move and makes it
+                                    print("human move made")
+                            elif self.model.PlayerIsHuman and self.model.game['GAMEOVER'] == False: #if player isnt human and current palyer is an AI and game isnt over
+                                print("AI MOVE CALCULATING")
+                                InputX, InputY1, InputY2 = self.ConvertMinimaxToInputs() #calls minimax within the function and then puts the algorithms move into a trio of varialbes
+                                self.model.MakeMove(InputX, InputY1, InputY2)
+                                self.view.DrawBoard()
+                                print("AI MOVE MADE")
 
     def ConvertMinimaxToInputs(self):
+        
         InputX, InputY1, InputY2 = None, None, None
-        evaluation, pos = self.model.Minimax(self.model.Board, 5, float ['-inf'], float ['inf'], False)
-        for row in self.model.Board:
-            for coloumn in self.model.Board[row]:
-                if self.model.Board[row][coloumn] != pos[row][coloumn]:
-                    if self.model.Board[row][coloumn] == "":
-                        row, coloumn = InputY1, InputX
-                    elif self.model.Board[row][coloumn] != "":
-                        row = InputY2
+        evaluation, pos2 = self.model.Minimax(self.model.Board, 10, -999, 999, True)
+        pos = self.model.minimax_pos[-1:][0]
+        print("converting minimax to inputs for MakeMove():")
+        print("evaluation,minimax_pos[-1:][0]: ", evaluation, pos)
+        for row_index, row in enumerate(self.model.Board):
+            for coloumn_index, coloumn in enumerate(self.model.Board[row_index]):
+                print("Board Index == ", self.model.Board[row_index][coloumn_index])
+                print("pos Index == ", pos[row_index][coloumn_index])
+                if self.model.Board[row_index][coloumn_index] != pos[row_index][coloumn_index]:
+                    print("tile in minimax board not same as main board")
+                    if self.model.Board[row_index][coloumn_index] == "":
+                        InputY2, InputX = row_index, coloumn_index
+                    elif self.model.Board[row_index][coloumn_index] != "":
+                        InputY1 = row_index
+        print(InputX, InputY1, InputY2)
         return InputX, InputY1, InputY2
 
 

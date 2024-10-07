@@ -131,25 +131,3 @@ class Button():
         self.rect.topleft = (x, y)
         self.clicked = False
         surface.blit(self.image, (self.rect.x, self.rect.y))
-
-        """
-    def ClickedOn(self, surface):
-        action = False
-      
-        if the position of the mouse is within the button, 
-        and if the mouse button 1 (0 basically) is pressed,
-        clicked = true
-        
-        mouse_pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(mouse_pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-                self.clicks = True
-                print("CLICKED")
-                action = True
-                
-        if pygame.mouse.get_pressed()[0] == 0:
-            self.clicked = False
-        
-        return action
-        """
-

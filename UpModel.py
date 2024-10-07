@@ -1,11 +1,13 @@
+from copy import deepcopy
 
 class UpThrustBoard():
     
     def __init__(self):
+        self.minimax_pos = []
+        self.minimax_turn = 1
         self.ListOfMoves = [] #2D list that holds all the moves minimax has made do they can be called upon later
         self.maxScore = 0
         self.minScore = 0
-        self.max_pieces = ["R", "G"]
         self.Clicked = False
         self.click_1_x = 0
         self.click_1_y = 0
@@ -38,6 +40,8 @@ class UpThrustBoard():
         #board = [row for i in range(7)]
         #board += [lst[:i] + lst[i:] for i in range(4)]
         self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
+        self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
+
 
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
@@ -63,27 +67,30 @@ class UpThrustBoard():
                       ["G", "R", "B", "Y"],
                       ["R", "B", "Y", "G"]]
 
-        self.BoardScore = [[140], 
-                      [120],
-                      [100], 
-                      [80],
-                      [60], 
-                      [40],
-                      [20], 
-                      [0], 
-                      [-10],
-                      [-20],
-                      [-20]]
+        self.BoardScore = [140, 
+                      120,
+                      100, 
+                      80,
+                      60, 
+                      40,
+                      20, 
+                      0, 
+                      -10,
+                      -20,
+                      -20]
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
             self.game['turn'] = (self.game['turn']+1)%4
-            print(self.game['turn'])
+            self.minimax_turn = self.game['turn']
+            print("player turn: ", self.game['turn'])
                 
         if self.playerCount == 3:
             self.game['turn'] = (self.game['turn']+1)%3
+            self.minimax_turn = self.game['turn']
         
         if self.playerCount == 2:
             self.game['turn'] = (self.game['turn']+1)%2
+            self.minimax_turn = self.game['turn']
 
     def GetMaximisingPlayer(self):
         if self.game['turn']%2 == 0: #if turn is an even number
@@ -94,49 +101,46 @@ class UpThrustBoard():
     def GetBoard(self):
         return self.Board
     
-    def NumberOfPiecesInLane(self, InputX, InputY1, InputY2):
+    def NumberOfPiecesInLane(self, InputX, InputY1, InputY2, board):
         counter = 4
-        for char in self.Board[InputY1]:
+        for char in board[InputY1]:
             if char == "":
                 counter -= 1
         return counter
     
-    def MatchingColours(self, char, InputX, InputY2):
+    def MatchingColours(self, char, InputX, InputY2, board):
         if InputY2 > 5:
-            for element in self.Board[InputY2]:
+            for element in board[InputY2]:
                 if element == char:
                     return False
                 
         return True
         
-    def FarForwards(self, char, InputX, InputY1, InputY2):
-        if (InputY1 - InputY2 == 1) & (self.IsFurthestForwards(char, InputX, InputY1)):
-            print("not far")
+    def FarForwards(self, char, InputX, InputY1, InputY2, board):
+        if (InputY1 - InputY2 == 1) & (self.IsFurthestForwards(char, InputX, InputY1, board)):
             return False
-        print("far")
         return True
 
-    def IsFurthestForwards(self, char, InputX, InputY1, a=0):
-        for index, row in enumerate(self.Board):
+    def IsFurthestForwards(self, char, InputX, InputY1, board, a=0):
+        for index, row in enumerate(board):
             for i in range(len(row)):
                 if row[i] == char and i != InputX and index >= InputY1:
                     a += 1                 
         if a == 3:
-            print("is furth:True")
             return True
         else:
-            print("is furthFalse")
+            
             return False
                 
-    
     #have something that checks the validity of a move (to be called upon later)
-    def LegalMove(self, InputX, InputY1, InputY2):
-        if (self.Board[InputY2][InputX] == "" and 
-            self.Board[InputY1][InputX] != "" and 
-            self.FarForwards(self.Board[InputY1][InputX], InputX, InputY1, InputY2) and 
-            self.NumberOfPiecesInLane(InputX, InputY1, InputY2) == InputY1 - InputY2 and 
-            self.MatchingColours(self.Board[InputY1][InputX], InputX, InputY2) and 
-            self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]):
+    def LegalMove(self, InputX, InputY1, InputY2, board):
+        
+        if (board[InputY2][InputX] == "" and 
+            board[InputY1][InputX] != "" and 
+            self.FarForwards(board[InputY1][InputX], InputX, InputY1, InputY2, board) and 
+            self.NumberOfPiecesInLane(InputX, InputY1, InputY2, board) == InputY1 - InputY2 and 
+            self.MatchingColours(board[InputY1][InputX], InputX, InputY2, board) and 
+            (self.playerColour[self.game['turn']] == board[InputY1][InputX] or self.playerColour[self.minimax_turn] == board[InputY1][InputX])):
             return True
         else:
             return False
@@ -144,7 +148,7 @@ class UpThrustBoard():
 
     #have something that makes moves 
     def MakeMove(self, InputX, InputY1, InputY2):
-        if self.LegalMove(InputX, InputY1, InputY2):
+        if self.LegalMove(InputX, InputY1, InputY2, self.Board):
             
             
             self.moves.append([InputY1, InputX, InputY2])
@@ -157,7 +161,6 @@ class UpThrustBoard():
             '''
             self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
             self.Board[InputY1][InputX] = ""
-            print(self.Board)
             self.CycleThruPlayerTurns()
 
 #have something that reverses moves
@@ -170,7 +173,7 @@ class UpThrustBoard():
         number_of_legal_moves = 16
         for index, line in enumerate(self.Board):
             for locus, char in enumerate(line):
-                if self.LegalMove(locus, index, 4 - line.count("")) == True:
+                if self.LegalMove(locus, index, 4 - line.count(""), self.Board) == True:
                     continue
                 else:
                     number_of_legal_moves -= 1
@@ -193,13 +196,9 @@ class UpThrustBoard():
             return False
         
     def ClickOne(self, pos):
-        print("woo")
         self.Clicked = True
         self.click_1_x = pos[0] // (300 // 4)
         self.click_1_y = pos[1] // (550 // 11)
-        print(pos)
-        print(self.click_1_x, self.click_1_y)
-        print(self.Clicked)
 
     def IsClickTwoEqualToClickOne(self, pos):
         Clicked = False
@@ -212,60 +211,65 @@ class UpThrustBoard():
 
     def FindY2(self, InputY1, board):
         number_of_pieces_in_row = 0
-        for char in self.Board[InputY1]:
+        for char in board[InputY1]:
             if char != "":
                 number_of_pieces_in_row += 1
         return (InputY1 - number_of_pieces_in_row)
 
     def GetChildren(self, position):
+        print("getting children")
         minimoves = []
-        for row in position:
-            for element in row:
-                y2 = self.FindY2(row, position)
-                if self.LegalMove(element, row, y2):
-                    Board2 = position
-                    #checks if everythings legal
-                    Board2 = self.MinimaxMove(element, row, y2, self.Board2)
-                    minimoves.append(Board2)
+        for index_row, row in enumerate(position):
+            for index_element, element in enumerate(row):
+                print("minimax turn: ", self.minimax_turn)
+                if element == self.playerColour[self.minimax_turn]:
+                    print("element == player colour", self.playerColour[self.minimax_turn])
+                    y2 = self.FindY2(index_row, position)
+                    if self.LegalMove(index_element, index_row, y2, position):
+                        print("move is legal")
+                        Board2 = deepcopy(position) 
+                        Board2 = self.MinimaxMove(index_element, index_row, y2, Board2)
+                        minimoves.append(Board2)
+        print("minimoves: ", minimoves)
         return minimoves
 
-    def MinimaxMove(self, InputX, InputY1, InputY2, position):
-        self.Board2[InputY2][InputX] == self.Board2[InputY1][InputX]
-        self.Board2[InputY1][InputX] == ""
+    def MinimaxMove(self, InputX, InputY1, InputY2, Board2):
+        Board2[InputY2][InputX] = Board2[InputY1][InputX]
+        Board2[InputY1][InputX] = ""
+        return Board2
 
     def Minimax(self, position, depth, alpha, beta, maximisingPlayer):
-        if depth == 0 or self.GameOver():
-            return position
-            #where is the point in here where the best move is stored so that I can pull it
+        print("minimax has been called")
+        print("position: ", position)
+        #print("maximising player: ", maximisingPlayer)
+        print("minimax depth: ", depth)
+        if depth == 0 or self.game['GAMEOVER']:
+        #    print("HIT DEPTH 0")
+            return self.evaluate(position), position
         if maximisingPlayer:
             max_eval = -999
             for child in self.GetChildren(position):
-                eval = self.Minimax(child, depth - 1, float ['-inf'], float ['inf'], False)[0]
-                max_eval = max(max_eval, eval) #because it isnt self.max_eval, isnt maxeval just -999 every single time because max eval is local
-                alpha = max(alpha, eval)
+                print("child: ", child)
+                minimax_eval, minimax_pos = self.Minimax(child, depth - 1, -999, 999, self.MaximisingPlayer())
+                self.minimax_pos.append(minimax_pos)
+                print("minimax_pos: ", minimax_pos)
+                max_eval = max(max_eval, minimax_eval)
+                alpha = max(alpha, minimax_eval)
                 if beta <= alpha:
                     break
-            return [max_eval, position]
+            return max_eval, position
         
         else:
             min_eval = 999
             for child in self.GetChildren(position):
-                eval = self.Minimax(child, depth - 1, float ['-inf'], float ['inf'], True)[0]
-                min_eval = min(min_eval, eval)
-                beta = max(beta, eval)
+                minimax_eval, minimax_pos = self.Minimax(child, depth - 1, -999, 999, self.MaximisingPlayer())
+                self.minimax_pos.append(minimax_pos)
+                print("child: ", child)
+                min_eval = min(min_eval, minimax_eval)
+                beta = max(beta, minimax_eval)
                 if beta <= alpha:
                     break
-            return [min_eval, position]
-
-    def PositionValue(self, position, score=0):
-        for row in position:
-            for char in row:
-                if char == MaxPiece:
-                    score += self.BoardScore[row][char]
-                elif char == MinPiece:
-                    score -= self.BoardScore[row][char]
-        
-        return score
+            return min_eval, position
 
     def ResetBoard(self):
         self.Board = [["", "", "", ""], 
@@ -281,17 +285,29 @@ class UpThrustBoard():
                       ["R", "B", "Y", "G"]]
 
     def evaluate(self, board, score=0):
-        for row in self.Board:
-            for char in row:
+        for index_row, row in enumerate(board):
+            for index_char, char in enumerate(row):
                 if char != "" and char != "Y":
-                    score += self.BoardScore[row]
-                elif char == "B" or char== "Y":
-                    score -= self.BoardScore[row]
+                    score -= self.BoardScore[index_row]
+                elif char == "Y":
+                    score += self.BoardScore[index_row]
+        return score
+
+    def MaximisingPlayer(self):
+
+        if self.minimax_turn == 4:
+            self.minimax_turn = (self.minimax_turn+1)%4
+            return True
+
+        self.minimax_turn = (self.minimax_turn+1)%4
+        return False
+
 
     def PlayerIsHuman(self):
-        if self.AiPlayers[self.mplayerColour[self.game['turn']]] == False: #if current player is AI
-            return False
-        return True
+        if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False: #if current player is AI
+            print("Player is AI: ", self.ColourAiPlayers[self.playerColour[self.game['turn']]])
+            return True
+        return False
         
         
 
