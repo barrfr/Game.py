@@ -27,7 +27,7 @@ class View():
     self.SCREEN_WIDTH = 300
     pygame.init()
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    self.start_img = pygame.image.load('Start_Button.PNG').convert_alpha()
+    self.start_img = pygame.image.load('UpThrust start.PNG').convert_alpha()
     self.run = True
     self.invboard = model.Board[::-1]
     self.playerColour = {
@@ -66,7 +66,7 @@ class View():
   def DrawMenu(self):
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
-    start_button = Button(50, 50, self.start_img, 0.1, self.screen)
+    start_button = Button(0, 0, self.start_img, 0.4, self.screen)
     
     pygame.display.update()
 

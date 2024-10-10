@@ -45,20 +45,24 @@ class Controller:
     def ConvertMinimaxToInputs(self):
         
         InputX, InputY1, InputY2 = None, None, None
-        evaluation, pos2 = self.model.Minimax(self.model.Board, 10, -999, 999, True)
+        evaluation, pos2 = self.model.Minimax(self.model.Board, 2, True, self.model.game['turn'])
         pos = self.model.minimax_pos[-1:][0]
         print("converting minimax to inputs for MakeMove():")
         print("evaluation,minimax_pos[-1:][0]: ", evaluation, pos)
+        print(pos2)
+        print(self.model.Board)
         for row_index, row in enumerate(self.model.Board):
             for coloumn_index, coloumn in enumerate(self.model.Board[row_index]):
-                print("Board Index == ", self.model.Board[row_index][coloumn_index])
-                print("pos Index == ", pos[row_index][coloumn_index])
+
                 if self.model.Board[row_index][coloumn_index] != pos[row_index][coloumn_index]:
                     print("tile in minimax board not same as main board")
+
                     if self.model.Board[row_index][coloumn_index] == "":
                         InputY2, InputX = row_index, coloumn_index
+
                     elif self.model.Board[row_index][coloumn_index] != "":
                         InputY1 = row_index
+                        
         print(InputX, InputY1, InputY2)
         return InputX, InputY1, InputY2
 
