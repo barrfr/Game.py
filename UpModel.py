@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+#github commits being silly
 class UpThrustBoard():
     
     def __init__(self):
@@ -178,20 +178,33 @@ class UpThrustBoard():
         return True
     
     def GameOver(self, board):
-        if (NolegalMoves(board) or TwoPiecesInScoringZone(board)):
+        if (NoLegalMoves(board) or TwoPiecesInScoringZone(board)):
             self.game['GAMEOVER'] = True
 
-    def NoLegalMoves(self, board):
+    def NoLegalMoves(self, board, piece):
         ''' 
         checks entire board for if there are any legal moves remaining, for each piece that cant move, deduct from 16, if it never reaches 0, that measn that theres n available move, return false, game over
         '''
         number_of_legal_moves = 16
-        for index, line in enumerate(board):
-            for locus, char in enumerate(line):
-                if self.LegalMove(locus, index, 4 - line.count(""), board) == True:
-                    continue
-                else:
-                    number_of_legal_moves -= 1
+
+        if piece == "any":
+            for index, line in enumerate(board):
+                for locus, char in enumerate(line):
+                    if self.LegalMove(locus, index, 4 - line.count(""), board) == True:
+                        continue
+                    else:
+                        number_of_legal_moves -= 1
+                        print("number_of_legal_moves: ", number_of_legal_moves)
+        
+        else:
+            number_of_legal_moves = 4
+            for index, line in enumerate(board):
+                for locus, char in enumerate(line):
+                    if char == piece:
+                        if self.LegalMove(locus, index, 4 - line.count(""), board) == True:
+                            continue
+                        else:
+                            number_of_legal_moves -= 1
                     
         if number_of_legal_moves == 0:
             return True
@@ -245,6 +258,7 @@ class UpThrustBoard():
         print("position: ", position)
         print("maximising player: ", maximisingPlayer)
         print("minimax depth: ", depth)
+
         if depth == 0 or self.game['GAMEOVER']:
             print("HIT DEPTH 0")
             return self.evaluate(position), position
@@ -252,9 +266,11 @@ class UpThrustBoard():
             max_eval = -999
             child_positions = self.GetChildren(position, currentTurn)
             print(child_positions)
-            while child_positions == []:
-                currentTurn = self.CycleThruMiniTurns(currentTurn)
-                child_positions = self.GetChildren(position, currentTurn)
+            if child_positions == []:
+                if currentTurn == 0:
+                    self.CycleThruPlayerTurns()
+                    return
+                minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 print(child_positions)
             for child in child_positions:
                 print("child: ", child)
@@ -269,9 +285,8 @@ class UpThrustBoard():
             min_eval = 999
             child_positions = self.GetChildren(position, currentTurn)
             print(child_positions)
-            while child_positions == []:
-                self.CycleThruMiniTurns(currentTurn)
-                child_positions = self.GetChildren(position, currentTurn)
+            if child_positions == []:
+                minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 print(child_positions)
             for child in child_positions:
                 minimax_eval, minimax_pos = self.Minimax(child, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))

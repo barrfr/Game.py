@@ -1,5 +1,5 @@
 import pygame
-
+import sys
 from UpModel import UpThrustBoard
 
 
@@ -14,6 +14,7 @@ red = [255, 0, 0]
 class View():
 
   def __init__(self, model, x=0, y=0):
+    self.font = pygame.font.Font(None, 74)
     self.blue = [0, 0, 255]
     self.green = [0, 255, 0]
     self.yellow = [255, 255, 0]
@@ -66,7 +67,7 @@ class View():
   def DrawMenu(self):
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
-    start_button = Button(0, 0, self.start_img, 0.4, self.screen)
+    start_button = Button(0, 0, self.start_img, 0.35, self.screen)
     
     pygame.display.update()
 
@@ -99,6 +100,19 @@ class View():
   def ConvertMouseLoc(self, location, row=0, coloumn=0):
     row = location[0] // (self.SCREEN_WIDTH // 4)
     coloumn = location[0] // (self.SCREEN_WIDTH // 11)
+
+  def DrawGameOver(self):
+    dark_surface = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+    dark_surface.set_alpha(150)
+    dark_surface.fill(black)
+    self.screen.blit(dark_surface, (0, 0))
+
+    game_over_text = self.font.render('GAME OVER', True, white)
+    text_rect = game_over_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
+
+    self.screen.blit(game_over_text, text_rect)
+    pygame.display.update()
+
 
   def DrawGrid(self):
     color = self.BarColouration()
