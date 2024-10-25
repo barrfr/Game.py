@@ -1,6 +1,6 @@
 
 
-
+#section d questions, they will be out of a certain number of marks, i suspect it will be a couple of section d type questions if its too hard it will be asingle 15 marker
 
     
         
@@ -35,4 +35,20 @@ for i in available moves
 """
 
         
+    # Darken the selected piece tile
+    if self.selected_piece is not None:
+        tile_width = 300 // 4
+        tile_height = 550 // 11
 
+        # Create a semi-transparent overlay (using RGBA where A is transparency)
+        darken_surface = pygame.Surface((tile_width, tile_height), pygame.SRCALPHA)
+        darken_surface.fill((0, 0, 0, 128))  # RGBA (black with 50% transparency)
+
+        # Position the darken_surface on the selected tile
+        posx = self.col * tile_width
+        posy = self.row * tile_height
+
+        # Blit the darkened surface onto the screen at the tile's position
+        screen.blit(darken_surface, (posx, posy))
+
+    pygame.display.update()

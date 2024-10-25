@@ -1,8 +1,12 @@
 from copy import deepcopy
-#github commits being silly
+
 class UpThrustBoard():
     
     def __init__(self):
+        self.col = 0
+        self.row = 0
+        self.why_two = 0
+        self.selected_piece = None
         self.minimax_pos = []
         self.minimax_turn = 1
         self.ListOfMoves = [] #2D list that holds all the moves minimax has made do they can be called upon later
@@ -26,6 +30,7 @@ class UpThrustBoard():
         self.minimoves = []
         self.game = {
             'GAMEOVER' : False,
+            'END SCREEN' : False,
             'winner': None,
             'turn': 1
             }
@@ -42,7 +47,6 @@ class UpThrustBoard():
         self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
         self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
 
-
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
@@ -54,7 +58,7 @@ class UpThrustBoard():
                       ["Y", "G", "R", "B"],
                       ["G", "R", "B", "Y"],
                       ["R", "B", "Y", "G"]]
-
+        
         self.BoardScore = [140, 
                       120,
                       100, 
@@ -96,12 +100,17 @@ class UpThrustBoard():
         
         return turn
 
+    def SkipPlayerTurn(self):
+        if self.NoLegalMoves(self.Board, self.playerColour[self.game['turn']]):
+            self.CycleThruPlayerTurns()
+            print("player turns cycled")
+
     """ 
         MOVE MANAGEMENT 
     """
 
     def MakeMove(self, InputX, InputY1, InputY2):
-        if self.LegalMove(InputX, InputY1, InputY2, self.Board):
+        if self.LegalMove(InputX, InputY1, InputY2, self.Board) and self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]:
             '''
             self.moves is a list of the last 10 moves, and it allows the player to take a move back 10 times
             its not very good, as taking a move back in a 4 player game is strange, but I wrote the code ages ago and am keeping it around just in case
@@ -139,12 +148,15 @@ class UpThrustBoard():
 
             return True
         else:
+            #print("UpModel 'LegalMove' is returning False")
             return False
+
 
     
     def FurthestForwardsAndMovingOnePlace(self, char, InputX, InputY1, InputY2, board):
        #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
         if (InputY1 - InputY2 == 1) and (self.IsFurthestForwards(char, InputX, InputY1, board)):
+
             return True
         return False
 
@@ -153,13 +165,12 @@ class UpThrustBoard():
         scans board for pieces of the same colour behind the current piece, if there are 3, return True
         '''
         for index, row in enumerate(board):
-            for index in range(len(row)):
-                if row[index] == char and index != InputX and index > InputY1:
+            for index2 in range(len(row)):
+                if row[index2] == char and index2 != InputX and index > InputY1:
                     a += 1                 
         if a == 3:
             return True
         else:
-            
             return False
 
     def NumberOfPiecesInLane(self, InputY1, board):
@@ -177,38 +188,42 @@ class UpThrustBoard():
                 
         return True
     
-    def GameOver(self, board):
-        if (NoLegalMoves(board) or TwoPiecesInScoringZone(board)):
-            self.game['GAMEOVER'] = True
 
     def NoLegalMoves(self, board, piece):
         ''' 
         checks entire board for if there are any legal moves remaining, for each piece that cant move, deduct from 16, if it never reaches 0, that measn that theres n available move, return false, game over
         '''
         number_of_legal_moves = 16
-
+        print("NoLegalMoves says these Moves are legal:")
         if piece == "any":
             for index, line in enumerate(board):
                 for locus, char in enumerate(line):
-                    if self.LegalMove(locus, index, 4 - line.count(""), board) == True:
-                        continue
-                    else:
-                        number_of_legal_moves -= 1
-                        print("number_of_legal_moves: ", number_of_legal_moves)
-        
+                    if char != "":
+                        if self.LegalMove(locus, index, self.FindY2(index, board), board) == True:
+                            pass
+                        else:
+                            number_of_legal_moves -= 1
+                            print("number_of_legal_moves: ", number_of_legal_moves)
+            
         else:
             number_of_legal_moves = 4
             for index, line in enumerate(board):
+                #print(index)
                 for locus, char in enumerate(line):
+                    #print("char: ", char)
                     if char == piece:
-                        if self.LegalMove(locus, index, 4 - line.count(""), board) == True:
-                            continue
+                        if self.LegalMove(locus, index, self.FindY2(index, board), board) == True:
+                            print(char)
+                            pass
                         else:
                             number_of_legal_moves -= 1
+                            print("number_of_legal_moves: ", number_of_legal_moves)
                     
         if number_of_legal_moves == 0:
+            print(True)
             return True
         else:
+            print(False)
             return False
 
     def TwoPiecesInScoringZone(self, board):
@@ -229,6 +244,35 @@ class UpThrustBoard():
     """ 
         CLICKING MANAGEMENT
     """
+
+    def Clicking(self, board, posx, posy):
+        row = posy // (550 // 11)
+        col = posx // (300 // 4)
+        if self.selected_piece == None:
+            if board[row][col] != "":
+                self.col = posx // (300 // 4)
+                self.row = posy // (550 // 11)
+                self.why_two = self.FindY2(row, board)
+                self.selected_piece = board[row][col]
+            else:
+                pass
+        else:
+            
+        # If user clicks the same piece again, deselect it
+            if row == self.row and col == self.col:
+                print("Deselecting piece")
+                self.selected_piece = None
+                self.row = None
+                self.col = None
+
+
+            elif self.LegalMove(self.col, self.row, self.why_two, board) and row == self.why_two and col == self.col:
+                print("move was indeed legal")
+                self.MakeMove(self.col, self.row, self.why_two)
+                self.selected_piece = None
+                
+
+
     def ClickOne(self, pos):
         ''' 
         splits board up into tiles and makes the click variables equal to whichever tile the click occured
@@ -256,62 +300,86 @@ class UpThrustBoard():
     def Minimax(self, position, depth, maximisingPlayer, currentTurn):
         print("minimax has been called")
         print("position: ", position)
-        print("maximising player: ", maximisingPlayer)
-        print("minimax depth: ", depth)
+        #print("maximising player: ", maximisingPlayer)
+        #print("minimax depth: ", depth)
 
         if depth == 0 or self.game['GAMEOVER']:
-            print("HIT DEPTH 0")
+            #print("HIT DEPTH 0")
             return self.evaluate(position), position
         if maximisingPlayer:
             max_eval = -999
             child_positions = self.GetChildren(position, currentTurn)
-            print(child_positions)
+            #print(child_positions)
             if child_positions == []:
+                minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
+                #print(child_positions)
+                """ 
                 if currentTurn == 0:
                     self.CycleThruPlayerTurns()
                     return
+                
                 minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 print(child_positions)
+                """
             for child in child_positions:
-                print("child: ", child)
+                #print("child: ", child)
                 minimax_eval, minimax_pos = 0, []
                 minimax_eval, minimax_pos = self.Minimax(child, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
-                self.minimax_pos.append(minimax_pos)
-                print("minimax_pos: ", minimax_pos)
+                self.MinimaxPositionAppend(position, minimax_pos)
+                #print("minimax_pos: ", minimax_pos)
                 max_eval = max(max_eval, minimax_eval)
             return max_eval, position
         
         else:
             min_eval = 999
             child_positions = self.GetChildren(position, currentTurn)
-            print(child_positions)
+            #print(child_positions)
             if child_positions == []:
                 minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
-                print(child_positions)
+                #print(child_positions)
             for child in child_positions:
                 minimax_eval, minimax_pos = self.Minimax(child, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
-                self.minimax_pos.append(minimax_pos)
-                print("child: ", child)
+                self.MinimaxPositionAppend(position, minimax_pos)
+                #print("child: ", child)
                 min_eval = min(min_eval, minimax_eval)
             return min_eval, position   
 
+    def MinimaxPositionAppend(self, pos1, pos2):
+        for row_index, row in enumerate(pos1):
+                for coloumn_index, coloumn in enumerate(pos1[row_index]):
+
+                    if pos1[row_index][coloumn_index] != pos2[row_index][coloumn_index]:
+                        #print("MINIMAX POS IS NOT SAME AS PREVIOUS POS")
+
+                        if pos1[row_index][coloumn_index] == "":
+                            InputY2, InputX = row_index, coloumn_index
+
+                        elif pos1[row_index][coloumn_index] != "":
+                            #print(self.playerColour[self.game['turn']])
+                            InputY1 = row_index
+
+        if self.LegalMove(InputX, InputY1, InputY2, pos1) == True:
+            self.minimax_pos.append(pos2)
+            
+
+
     def GetChildren(self, position, currentTurn):
-        print("getting children")
+        #print("getting children")
         minimoves = []
         for index_row, row in enumerate(position):
             for index_element, element in enumerate(row):
-                print("element: ", element)
+                #print("element: ", element)
                 if element == self.playerColour[currentTurn]:
                     y2 = self.FindY2(index_row, position)
                     if self.LegalMove(index_element, index_row, y2, position):
-                        print("move is legal")
+                        #print("move is legal")
                         Board2 = deepcopy(position) 
                         Board2 = self.MinimaxMove(index_element, index_row, y2, Board2)
                         minimoves.append(Board2)
-                        print(f"legal move generated = {self.playerColour[currentTurn]} in column {index_element} from {index_row} to {y2}")
-                        print(Board2)
+                        #print(f"legal move generated = {self.playerColour[currentTurn]} in column {index_element} from {index_row} to {y2}")
+                        #print(Board2)
         #no legal moves have been found
-        print("minimoves: ", minimoves)
+        #print("minimoves: ", minimoves)
         return minimoves
 
     def FindY2(self, InputY1, board):
@@ -319,7 +387,8 @@ class UpThrustBoard():
         for char in board[InputY1]:
             if char != "":
                 number_of_pieces_in_row += 1
-        return (InputY1 - number_of_pieces_in_row)
+        
+        return (max(InputY1 - number_of_pieces_in_row, 0))
 
     def MinimaxMove(self, InputX, InputY1, InputY2, Board2):
         Board2[InputY2][InputX] = Board2[InputY1][InputX]
@@ -353,14 +422,24 @@ class UpThrustBoard():
 
     def PlayerIsHuman(self):
         if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False: #if current player is AI
-            print("Player is AI: ", self.ColourAiPlayers[self.playerColour[self.game['turn']]])
+            #print("Player is AI: ", self.ColourAiPlayers[self.playerColour[self.game['turn']]])
             return True
         return False    
 
     """ 
         MISC
     """ 
+
+    def ResetGame(self):
+        self.ResetBoard()
+        self.game["END SCREEN"] = True
+        self.game['turn'] == 1
     
+    def GameOver(self, board):
+        if (self.NoLegalMoves(board, "any") or self.TwoPiecesInScoringZone(board)):
+            self.game['GAMEOVER'] = True
+            self.ResetGame()
+
     def GetBoard(self):
         return self.Board
 

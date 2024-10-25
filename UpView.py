@@ -1,8 +1,8 @@
 import pygame
 import sys
-from UpModel import UpThrustBoard
-
-
+import UpModel
+import UpController
+import multiprocessing
 
 blue = [0, 0, 255]
 green = [0, 255, 0]
@@ -27,10 +27,13 @@ class View():
     self.SCREEN_HEIGHT = 550
     self.SCREEN_WIDTH = 300
     pygame.init()
+
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    self.start_img = pygame.image.load('UpThrust start.PNG').convert_alpha()
+    self.Black_Square = pygame.image.load('Black_Square.PNG').convert_alpha()
+    self.Fourules_img = pygame.image.load('FourRules.PNG').convert_alpha()
+    self.start_img = pygame.image.load('Upthrust start.PNG').convert_alpha()
     self.run = True
-    self.invboard = model.Board[::-1]
+    self.invboard = self.model.Board[::-1]
     self.playerColour = {
             1: red,
             2: blue,
@@ -50,11 +53,17 @@ class View():
     pygame.draw.polygon(self.screen, color, [(0, 0), (300, 0), (300, 25), (0, 25)])
   """
 
+  def RulesWindow(self):
+    self.rules_window = (pygame.display.set_mode((300, 600)))
+    self.Fourules_img = pygame.image.load('FourRules.PNG').convert_alpha()
+    if self.model.playerCount == 4:
+      Img(0, 0, self.Fourules_img, 0.52, self.rules_window)
+
   def DrawBoard(self):
     self.screen.fill(white)
     self.DrawGrid() 
     #self.BarAtTheTop()
-    for i, character in enumerate(self.invboard):
+    for i, character in enumerate(self.model.Board[::-1]):
       for j, char in enumerate(character[::-1]):
         y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
         x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
@@ -67,7 +76,7 @@ class View():
   def DrawMenu(self):
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
-    start_button = Button(0, 0, self.start_img, 0.35, self.screen)
+    start_button = Img(0, 0, self.start_img, 0.52, self.screen)
     
     pygame.display.update()
 
@@ -101,6 +110,38 @@ class View():
     row = location[0] // (self.SCREEN_WIDTH // 4)
     coloumn = location[0] // (self.SCREEN_WIDTH // 11)
 
+  def DimTile(self, x, y):
+    tile_width = 300 // 4
+    tile_height = 550 // 11
+
+    
+    
+    posx = x // tile_width
+    posy = y // tile_height
+    print("posx, posy: ", posx, posy)
+    dark_square = Img(posx, posy, self.Black_Square, 1, pygame.Surface)
+
+    pygame.display.update()
+
+    """
+    tile_width = 300 // 4
+    tile_height = 550 // 11
+
+    darken_surface = pygame.Surface((tile_width, tile_height))
+
+    darken_surface.fill((0, 0, 0))
+    darken_surface.set_alpha(128) # 50% transparent
+
+    posx = x // tile_width
+    posy = y // tile_height
+    print("posx, posy: ", posx, posy)
+    self.screen.blit(darken_surface, (posx, posy))
+    """
+
+   
+
+
+
   def DrawGameOver(self):
     dark_surface = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     dark_surface.set_alpha(150)
@@ -131,7 +172,7 @@ class View():
       
     
 
-class Button():
+class Img():
     def __init__(self, x, y, image, scale, surface):
         """
         creates a button at the x and y coordinates given,
@@ -143,5 +184,4 @@ class Button():
         self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.clicked = False
-        surface.blit(self.image, (self.rect.x, self.rect.y))
+        surface.blit(self.image, (x, y))

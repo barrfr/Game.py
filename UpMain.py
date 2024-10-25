@@ -5,6 +5,8 @@ import pygame
 pygame.init()
 not_answered = True
 
+#stupid minimax is moving its own piece one tile up when the piece is the most advanced piece
+
 if __name__ == "__main__":
     print("game ran")
     model = UpModel.UpThrustBoard()
