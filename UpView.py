@@ -10,10 +10,14 @@ yellow = [255, 255, 0]
 black = [0, 0, 0]
 white = [255, 255, 255]
 red = [255, 0, 0]
+grey = [255/2, 255/2, 255/2]
 
 class View():
 
   def __init__(self, model, x=0, y=0):
+    self.black_bar = False
+    self.menu_scale = 0.82
+    self.selected_coords = 0, 0
     self.font = pygame.font.Font(None, 74)
     self.blue = [0, 0, 255]
     self.green = [0, 255, 0]
@@ -30,8 +34,16 @@ class View():
 
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     self.Black_Square = pygame.image.load('Black_Square.PNG').convert_alpha()
-    self.Fourules_img = pygame.image.load('FourRules.PNG').convert_alpha()
+    self.rules_img = pygame.image.load('FourRules.PNG').convert_alpha()
     self.start_img = pygame.image.load('Upthrust start.PNG').convert_alpha()
+    self.menu_img = pygame.image.load('Upthrust Menu.PNG').convert_alpha()
+    self.one_img = pygame.image.load('One.PNG').convert_alpha()
+    self.two_img = pygame.image.load('Two.PNG').convert_alpha()
+    self.three_img = pygame.image.load('Three.PNG').convert_alpha()
+    self.four_img = pygame.image.load('Four.PNG').convert_alpha()
+    self.yes_img = pygame.image.load('Yes.PNG').convert_alpha()
+    self.no_img = pygame.image.load('No.PNG').convert_alpha()
+
     self.run = True
     self.invboard = self.model.Board[::-1]
     self.playerColour = {
@@ -43,23 +55,37 @@ class View():
 
   
   def BarColouration(self, color=0):
-    color = self.playerColour[self.model.game['turn']]
-    return color
+    if self.black_bar == False:
+      color = self.playerColour[self.model.game['turn']]
+      return color
+    
+    return black
 
-  """ 
-  def BarAtTheTop(self):
-    color = self.BarColouration()
-    "rect(surface, color, pos)"
-    pygame.draw.polygon(self.screen, color, [(0, 0), (300, 0), (300, 25), (0, 25)])
-  """
+  def DrawSetup(self):
+    Img(0, 0, self.menu_img, self.menu_scale, self.screen)
+    pygame.display.update()
 
-  def RulesWindow(self):
-    self.rules_window = (pygame.display.set_mode((300, 600)))
-    self.Fourules_img = pygame.image.load('FourRules.PNG').convert_alpha()
-    if self.model.playerCount == 4:
-      Img(0, 0, self.Fourules_img, 0.52, self.rules_window)
+  def PasteImage(self, filename, x, y):
+    Img(x, y, filename, self.menu_scale, self.screen)
+    pygame.display.update()
 
-  def DrawBoard(self):
+  def DrawMenu(self):
+    print("menu drawn")
+    self.screen.fill((255, 255, 255))  # White background
+    pygame.display.set_caption("Menu")
+    pygame.draw.rect(self.screen, (200, 0, 0), (100, 275, 200, 50))  # Example button area
+    pygame.display.update()
+
+  def DrawRules(self):
+    new_width = 800  
+    new_height = 600 
+    self.screen = pygame.display.set_mode((new_width, new_height))
+    
+    self.screen.fill((255, 255, 255))
+    Img(0, 3, self.rules_img, 0.5, self.screen)
+    pygame.display.update()
+
+  def DrawBoard(self, mauspos):
     self.screen.fill(white)
     self.DrawGrid() 
     #self.BarAtTheTop()
@@ -67,11 +93,23 @@ class View():
       for j, char in enumerate(character[::-1]):
         y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
         x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
-        self.DrawPieces(x, y, char)
+
+        self.DrawPieces(x, y, char, self.model.selected_coor, 10-i, 3-j)
     pygame.display.update()
-        
-    print("screen just updated boss")
+    #print("screen just updated boss")
     
+  def GreyCircle(self, n, l):
+    self.screen.fill(white)
+    self.DrawGrid() 
+    #self.BarAtTheTop()
+    for i, character in enumerate(self.model.Board[::-1]):
+      for j, char in enumerate(character[::-1]):
+        y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
+        x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
+
+        self.DrawPieces(x, y, char, self.model.selected_coor, l, n)
+    pygame.display.update()
+    #print("screen just updated boss")
 
   def DrawMenu(self):
     pygame.display.set_caption("Menu")
@@ -80,7 +118,15 @@ class View():
     
     pygame.display.update()
 
-  def DrawPieces(self, x, y, character):
+  def DrawPieces(self, x, y, character, selected, i, j):
+    if selected is None:
+      pass
+
+    elif selected[0] == i and selected[1] == j:
+      pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5, self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
+      pygame.draw.circle(self.screen, black, (x, y), 10)
+      pygame.display.update()
+      #print("circles drawn at:", (x, y))
 
     """circle(surface, color, center, radius)"""
     if character == 'R':
@@ -109,38 +155,6 @@ class View():
   def ConvertMouseLoc(self, location, row=0, coloumn=0):
     row = location[0] // (self.SCREEN_WIDTH // 4)
     coloumn = location[0] // (self.SCREEN_WIDTH // 11)
-
-  def DimTile(self, x, y):
-    tile_width = 300 // 4
-    tile_height = 550 // 11
-
-    
-    
-    posx = x // tile_width
-    posy = y // tile_height
-    print("posx, posy: ", posx, posy)
-    dark_square = Img(posx, posy, self.Black_Square, 1, pygame.Surface)
-
-    pygame.display.update()
-
-    """
-    tile_width = 300 // 4
-    tile_height = 550 // 11
-
-    darken_surface = pygame.Surface((tile_width, tile_height))
-
-    darken_surface.fill((0, 0, 0))
-    darken_surface.set_alpha(128) # 50% transparent
-
-    posx = x // tile_width
-    posy = y // tile_height
-    print("posx, posy: ", posx, posy)
-    self.screen.blit(darken_surface, (posx, posy))
-    """
-
-   
-
-
 
   def DrawGameOver(self):
     dark_surface = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))

@@ -3,10 +3,12 @@ from copy import deepcopy
 class UpThrustBoard():
     
     def __init__(self):
+        self.AiPlayer = False
         self.col = 0
         self.row = 0
         self.why_two = 0
         self.selected_piece = None
+        self.selected_coor = None
         self.minimax_pos = []
         self.minimax_turn = 1
         self.ListOfMoves = [] #2D list that holds all the moves minimax has made do they can be called upon later
@@ -74,16 +76,33 @@ class UpThrustBoard():
     """ 
         TURN MANAGEMENT
     """
+    def CycleBackwardsPlayerTurns(self):
+        if self.playerCount == 4:
+            self.game['turn'] = (self.game['turn']-1)%4
+            #print("player turn: ", self.game['turn'])
+                
+        if self.playerCount == 3:
+            self.game['turn'] = (self.game['turn']-1)%3
+        
+        if self.playerCount == 2:
+            self.game['turn'] = (self.game['turn']-1)%2
+        
+        if self.playerCount == 1:
+            self.game['turn'] = 1
+
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
             self.game['turn'] = (self.game['turn']+1)%4
-            print("player turn: ", self.game['turn'])
+            #print("player turn: ", self.game['turn'])
                 
         if self.playerCount == 3:
             self.game['turn'] = (self.game['turn']+1)%3
         
         if self.playerCount == 2:
             self.game['turn'] = (self.game['turn']+1)%2
+
+        if self.playerCount == 1:
+            self.game['turn'] = 1
 
     def CycleThruMiniTurns(self, turn):
         '''
@@ -97,20 +116,24 @@ class UpThrustBoard():
 
         if self.playerCount == 2:
             turn = (turn+1)%2
+
+        if self.playerCount == 1:
+            turn = 1
         
         return turn
 
     def SkipPlayerTurn(self):
         if self.NoLegalMoves(self.Board, self.playerColour[self.game['turn']]):
             self.CycleThruPlayerTurns()
-            print("player turns cycled")
+            #print("Cycle 1 model")
+            #print("player turns cycled")
 
     """ 
         MOVE MANAGEMENT 
     """
 
     def MakeMove(self, InputX, InputY1, InputY2):
-        if self.LegalMove(InputX, InputY1, InputY2, self.Board) and self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]:
+        if self.LegalMove(InputX, InputY1, InputY2, self.Board) and self.IsPlayersPiece(InputX, InputY1):
             '''
             self.moves is a list of the last 10 moves, and it allows the player to take a move back 10 times
             its not very good, as taking a move back in a 4 player game is strange, but I wrote the code ages ago and am keeping it around just in case
@@ -123,6 +146,7 @@ class UpThrustBoard():
             self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
             self.Board[InputY1][InputX] = ""
             self.CycleThruPlayerTurns()
+            #print("Cycle 2 mdoel")
 
     def RetractMove(self, InputX, InputY1, InputY2):
         self.Board[self.moves[9][0]][self.moves[9][1]] = self.Board[self.moves[9][2]][self.moves[9][1]] 
@@ -187,6 +211,18 @@ class UpThrustBoard():
                     return False
                 
         return True
+
+    def IsPlayersPiece(self, InputX, InputY1):
+        if self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]:
+            return True
+        elif (self.playerCount == 3) and (self.Board[InputY1][InputX] == self.playerColour[self.game['turn']] or self.Board[InputY1][InputX] == 'G'):
+            return True
+        elif (self.playerCount == 2) and (self.Board[InputY1][InputX] == self.playerColour[self.game['turn']] or self.Board[InputY1][InputX] == 'G' or self.Board[InputY1][InputX] == 'B'):
+            return True
+        elif (self.playerCount == 1) and (self.Board[InputY1][InputX] == self.playerColour[self.game['turn']] or self.Board[InputY1][InputX] == 'G' or self.Board[InputY1][InputX] == 'B' or self.Board[InputY1][InputX] == 'Y'):
+            return True
+        else:
+            return False
     
 
     def NoLegalMoves(self, board, piece):
@@ -194,7 +230,6 @@ class UpThrustBoard():
         checks entire board for if there are any legal moves remaining, for each piece that cant move, deduct from 16, if it never reaches 0, that measn that theres n available move, return false, game over
         '''
         number_of_legal_moves = 16
-        print("NoLegalMoves says these Moves are legal:")
         if piece == "any":
             for index, line in enumerate(board):
                 for locus, char in enumerate(line):
@@ -203,7 +238,7 @@ class UpThrustBoard():
                             pass
                         else:
                             number_of_legal_moves -= 1
-                            print("number_of_legal_moves: ", number_of_legal_moves)
+                            #print("number_of_legal_moves for all: ", number_of_legal_moves)
             
         else:
             number_of_legal_moves = 4
@@ -213,17 +248,15 @@ class UpThrustBoard():
                     #print("char: ", char)
                     if char == piece:
                         if self.LegalMove(locus, index, self.FindY2(index, board), board) == True:
-                            print(char)
+                            #print(char)
                             pass
                         else:
                             number_of_legal_moves -= 1
-                            print("number_of_legal_moves: ", number_of_legal_moves)
+                            #print("number_of_legal_moves for piece: ", number_of_legal_moves)
                     
         if number_of_legal_moves == 0:
-            print(True)
             return True
         else:
-            print(False)
             return False
 
     def TwoPiecesInScoringZone(self, board):
@@ -253,21 +286,23 @@ class UpThrustBoard():
                 self.col = posx // (300 // 4)
                 self.row = posy // (550 // 11)
                 self.why_two = self.FindY2(row, board)
-                self.selected_piece = board[row][col]
+                self.selected_piece = board[self.row][self.col]
+                self.selected_coor = (self.row, self.col)
             else:
                 pass
         else:
             
         # If user clicks the same piece again, deselect it
             if row == self.row and col == self.col:
-                print("Deselecting piece")
+                #print("Deselecting piece")
                 self.selected_piece = None
                 self.row = None
                 self.col = None
+                self.selected_coor = None
 
 
             elif self.LegalMove(self.col, self.row, self.why_two, board) and row == self.why_two and col == self.col:
-                print("move was indeed legal")
+                #print("move was indeed legal")
                 self.MakeMove(self.col, self.row, self.why_two)
                 self.selected_piece = None
                 
@@ -300,47 +335,40 @@ class UpThrustBoard():
     def Minimax(self, position, depth, maximisingPlayer, currentTurn):
         print("minimax has been called")
         print("position: ", position)
-        #print("maximising player: ", maximisingPlayer)
-        #print("minimax depth: ", depth)
+        print("maximising player: ", maximisingPlayer)
+        print("minimax depth: ", depth)
 
         if depth == 0 or self.game['GAMEOVER']:
-            #print("HIT DEPTH 0")
+            print("HIT DEPTH 0")
             return self.evaluate(position), position
         if maximisingPlayer:
             max_eval = -999
             child_positions = self.GetChildren(position, currentTurn)
-            #print(child_positions)
+            print(child_positions)
             if child_positions == []:
                 minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
-                #print(child_positions)
-                """ 
-                if currentTurn == 0:
-                    self.CycleThruPlayerTurns()
-                    return
-                
-                minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 print(child_positions)
-                """
+
             for child in child_positions:
-                #print("child: ", child)
+                print("child: ", child)
                 minimax_eval, minimax_pos = 0, []
                 minimax_eval, minimax_pos = self.Minimax(child, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 self.MinimaxPositionAppend(position, minimax_pos)
-                #print("minimax_pos: ", minimax_pos)
+                print("minimax_pos: ", minimax_pos)
                 max_eval = max(max_eval, minimax_eval)
             return max_eval, position
         
         else:
             min_eval = 999
             child_positions = self.GetChildren(position, currentTurn)
-            #print(child_positions)
+            print(child_positions)
             if child_positions == []:
                 minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
-                #print(child_positions)
+                print(child_positions)
             for child in child_positions:
                 minimax_eval, minimax_pos = self.Minimax(child, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn))
                 self.MinimaxPositionAppend(position, minimax_pos)
-                #print("child: ", child)
+                print("child: ", child)
                 min_eval = min(min_eval, minimax_eval)
             return min_eval, position   
 
@@ -369,7 +397,7 @@ class UpThrustBoard():
         for index_row, row in enumerate(position):
             for index_element, element in enumerate(row):
                 #print("element: ", element)
-                if element == self.playerColour[currentTurn]:
+                if self.IsPlayersPiece(index_element, index_row):
                     y2 = self.FindY2(index_row, position)
                     if self.LegalMove(index_element, index_row, y2, position):
                         #print("move is legal")
@@ -414,16 +442,19 @@ class UpThrustBoard():
     def evaluate(self, board, score=0):
         for index_row, row in enumerate(board):
             for index_char, char in enumerate(row):
-                if char != "" and char != self.playerColour[self.game['turn']]:
+                if char in self.ColourAiPlayers and char != self.playerColour[self.game['turn']]:
                     score -= self.BoardScore[index_row]
                 elif char == self.playerColour[self.game['turn']]:
                     score += self.BoardScore[index_row]
         return score
 
+#self.ColourAiPlayers[self.playerColour[self.game['turn']]] == True when it shouldnt 
     def PlayerIsHuman(self):
         if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False: #if current player is AI
-            #print("Player is AI: ", self.ColourAiPlayers[self.playerColour[self.game['turn']]])
             return True
+        print("AI player? ", self.AiPlayer)
+        print("Player is AI: ", self.ColourAiPlayers[self.playerColour[self.game['turn']]])
+        print("self.ColourAiPlayers = ", self.ColourAiPlayers)
         return False    
 
     """ 
@@ -457,4 +488,45 @@ class UpThrustBoard():
                       ["R", "B", "Y", "G"]]
 
 
+    def GameStartLogic(self):
+        if self.playerCount == 4:
+            if self.AiPlayer == True:
+                self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
+                self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
+
+            else:
+                self.AiPlayers = {1:False, 2:False, 3:False, 0:False}
+                self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':False}
+                print("self.ColourAiPlayers = ", self.ColourAiPlayers)
+
+
+        if self.playerCount == 3:
+            if self.AiPlayer == True:
+                self.AiPlayers = {1:False, 2:False, 0:True}
+                self.ColourAiPlayers = {'R':False, 'B':False, 'Y':True}
+
+            else:
+                self.AiPlayers = {1:False, 2:False, 0:False}
+                self.ColourAiPlayers = {'R':False, 'B':False, 'Y':False}
+        
+        if self.playerCount == 2:
+            if self.AiPlayer == True:
+                self.AiPlayers = {1:False, 0:True}
+                self.ColourAiPlayers = {'R':False, 'Y':True}
+
+            else:
+                self.AiPlayers = {1:False, 0:False}
+                self.ColourAiPlayers = {'R':False, 'Y':False}
+
+        if self.playerCount == 1:
+            if self.AiPlayer == True:
+                self.AiPlayers = {1:True}
+                self.ColourAiPlayers = {'R':True}
+
+            else:
+                self.AiPlayers = {1:False}
+                self.ColourAiPlayers = {'R':False}
+
+            
+        
       
