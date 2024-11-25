@@ -70,7 +70,7 @@ class View():
     pygame.display.update()
 
   def DrawMenu(self):
-    print("menu drawn")
+    #print("menu drawn")
     self.screen.fill((255, 255, 255))  # White background
     pygame.display.set_caption("Menu")
     pygame.draw.rect(self.screen, (200, 0, 0), (100, 275, 200, 50))  # Example button area
@@ -80,7 +80,7 @@ class View():
     new_width = 800  
     new_height = 600 
     self.screen = pygame.display.set_mode((new_width, new_height))
-    
+
     self.screen.fill((255, 255, 255))
     Img(0, 3, self.rules_img, 0.5, self.screen)
     pygame.display.update()
@@ -162,11 +162,23 @@ class View():
     dark_surface.fill(black)
     self.screen.blit(dark_surface, (0, 0))
 
+    scores = self.model.CountScores()
+    #print(f"scores are {scores}")
+    sorted_scores = sorted(scores, key=lambda x: x[0], reverse=True)
+
     game_over_text = self.font.render('GAME OVER', True, white)
     text_rect = game_over_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
-
     self.screen.blit(game_over_text, text_rect)
+    
+    y_offset = text_rect.bottom + 20
+    for score, player_color in sorted_scores:
+        score_text = self.font.render(f'{player_color}: {score}', True, white)
+        score_rect = score_text.get_rect(center=(self.SCREEN_WIDTH // 2, y_offset))
+        self.screen.blit(score_text, score_rect)
+        y_offset += 40
+
     pygame.display.update()
+
 
 
   def DrawGrid(self):
