@@ -123,6 +123,7 @@ class View():
       pass
 
     elif selected[0] == i and selected[1] == j:
+      pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5 - ((self.SCREEN_HEIGHT/11)*self.model.ViewFindY2(i, self.model.Board)+1.5), self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
       pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5, self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
       pygame.draw.circle(self.screen, black, (x, y), 10)
       pygame.display.update()

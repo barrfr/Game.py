@@ -456,11 +456,21 @@ class UpThrustBoard():
 
     def FindY2(self, InputY1, board):
         number_of_pieces_in_row = 0
+        
         for char in board[InputY1]:
             if char != "":
                 number_of_pieces_in_row += 1
         
         return (max(InputY1 - number_of_pieces_in_row, 0))
+
+    def ViewFindY2(self, InputY1, board):
+        number_of_pieces_in_row = 0
+        
+        for char in board[InputY1]:
+            if char != "":
+                number_of_pieces_in_row += 1
+        
+        return (max(number_of_pieces_in_row, 0))
 
     def MinimaxMove(self, InputX, InputY1, InputY2, Board2):
         Board2[InputY2][InputX] = Board2[InputY1][InputX]
