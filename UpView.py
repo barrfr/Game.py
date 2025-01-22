@@ -34,7 +34,6 @@ class View():
 
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     self.Black_Square = pygame.image.load('Black_Square.PNG').convert_alpha()
-    self.rules_img = pygame.image.load('FourRules.PNG').convert_alpha()
     self.start_img = pygame.image.load('Upthrust start.PNG').convert_alpha()
     self.menu_img = pygame.image.load('Upthrust Menu.PNG').convert_alpha()
     self.one_img = pygame.image.load('One.PNG').convert_alpha()
@@ -43,6 +42,13 @@ class View():
     self.four_img = pygame.image.load('Four.PNG').convert_alpha()
     self.yes_img = pygame.image.load('Yes.PNG').convert_alpha()
     self.no_img = pygame.image.load('No.PNG').convert_alpha()
+    self.rulessetup_img = pygame.image.load('RulesSetup.PNG').convert_alpha()
+
+    self.rules1_img = pygame.image.load('OneRules.PNG').convert_alpha()
+    self.rules2_img = pygame.image.load('TwoRules.PNG').convert_alpha()
+    self.rules3_img = pygame.image.load('ThreeRules.PNG').convert_alpha()
+    self.rules4_img = pygame.image.load('FourRules.PNG').convert_alpha()
+
 
     self.run = True
     self.invboard = self.model.Board[::-1]
@@ -69,20 +75,25 @@ class View():
     Img(x, y, filename, self.menu_scale, self.screen)
     pygame.display.update()
 
-  def DrawMenu(self):
-    #print("menu drawn")
-    self.screen.fill((255, 255, 255))  # White background
-    pygame.display.set_caption("Menu")
-    pygame.draw.rect(self.screen, (200, 0, 0), (100, 275, 200, 50))  # Example button area
+  def DrawRulesSetup(self):
+    pygame.draw.rect(self.screen, [191, 191, 191], (0, 0, self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+    Img(0, 0, self.rulessetup_img, 0.65, self.screen)
     pygame.display.update()
 
-  def DrawRules(self):
+  def DrawRules(self, value):
     new_width = 800  
     new_height = 600 
     self.screen = pygame.display.set_mode((new_width, new_height))
-
     self.screen.fill((255, 255, 255))
-    Img(0, 3, self.rules_img, 0.5, self.screen)
+    if value == '1':
+      Img(0, 3, self.rules1_img, 0.5, self.screen)
+    elif value == '2':
+      Img(0, 3, self.rules2_img, 0.5, self.screen) 
+    elif value == '3':
+      Img(0, 3, self.rules3_img, 0.5, self.screen) 
+    elif value == '4':
+      Img(0, 3, self.rules4_img, 0.5, self.screen) 
+
     pygame.display.update()
 
   def DrawBoard(self, mauspos):
@@ -96,7 +107,6 @@ class View():
 
         self.DrawPieces(x, y, char, self.model.selected_coor, 10-i, 3-j)
     pygame.display.update()
-    #print("screen just updated boss")
     
   def GreyCircle(self, n, l):
     self.screen.fill(white)
@@ -109,9 +119,9 @@ class View():
 
         self.DrawPieces(x, y, char, self.model.selected_coor, l, n)
     pygame.display.update()
-    #print("screen just updated boss")
 
   def DrawMenu(self):
+    self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
     start_button = Img(0, 0, self.start_img, 0.52, self.screen)
@@ -127,7 +137,6 @@ class View():
       pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5, self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
       pygame.draw.circle(self.screen, black, (x, y), 10)
       pygame.display.update()
-      #print("circles drawn at:", (x, y))
 
     """circle(surface, color, center, radius)"""
     if character == 'R':
@@ -164,7 +173,7 @@ class View():
     self.screen.blit(dark_surface, (0, 0))
 
     scores = self.model.CountScores()
-    #print(f"scores are {scores}")
+    
     sorted_scores = sorted(scores, key=lambda x: x[0], reverse=True)
 
     game_over_text = self.font.render('GAME OVER', True, white)
@@ -177,7 +186,6 @@ class View():
         score_rect = score_text.get_rect(center=(self.SCREEN_WIDTH // 2, y_offset))
         self.screen.blit(score_text, score_rect)
         y_offset += 40
-
     pygame.display.update()
 
 
