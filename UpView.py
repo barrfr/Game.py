@@ -80,19 +80,19 @@ class View():
     Img(0, 0, self.rulessetup_img, 0.65, self.screen)
     pygame.display.update()
 
-  def DrawRules(self, value):
-    new_width = 800  
-    new_height = 600 
+  def DrawRulesForPlayer(self, value):
+    new_width = 700
+    new_height = 662.5
     self.screen = pygame.display.set_mode((new_width, new_height))
     self.screen.fill((255, 255, 255))
     if value == '1':
-      Img(0, 3, self.rules1_img, 0.5, self.screen)
+      Img(0, 3, self.rules1_img, 0.8, self.screen)
     elif value == '2':
-      Img(0, 3, self.rules2_img, 0.5, self.screen) 
+      Img(0, 3, self.rules2_img, 0.812, self.screen) 
     elif value == '3':
-      Img(0, 3, self.rules3_img, 0.5, self.screen) 
+      Img(0, 3, self.rules3_img, 0.811, self.screen) 
     elif value == '4':
-      Img(0, 3, self.rules4_img, 0.5, self.screen) 
+      Img(0, 3, self.rules4_img, 0.8, self.screen) 
 
     pygame.display.update()
 

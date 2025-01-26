@@ -7,123 +7,150 @@ import random
 
 class Controller:
     def __init__(self, model, view):
-        self.rulessetup = False
-        self.threads = 0
+        """
+        Initialization function of the controller
+
+        Args:
+            model: instantiates a model object that the controller will use for the entirety fo the program
+            view: instantiates a view object that the controller will use for the entirety fo the program
+
+        List of variables:
+            rulessetup (bool): used to see if the current screen is the rules setup screen
+            threads (int): variable to initialise CheckAI func within a thread
+            self.check_ai (bool): used for the running loop of CheckAI function
+            self.one_player (bool): variable that tells the program if the user requests a single player game
+            self.model (class): instantiates an instance of UpModel.py
+            self.view (class): instantiates an instance of UpView.py
+            self.running (bool): used for the event manager loop
+            self.menu_screen (bool): tells the program if the user is currently on the menu screen
+            self.rules_screen (bool): tells the program if the user is currently on the rules screen
+            self.setup_screen (bool): tells the program if the user is currently on the game setup screen
+            self.t1 (class): readies the t1 thread for initialisation 
+        """
+        self.rulessetup = False 
+        self.threads = 0 
         self.check_ai = True
         self.one_player = False
         self.model = model
         self.view = view
         self.running = True
         self.menu_screen = True
-        self.rules_screen = False
+        self.rules_screen = False 
         self.setup_screen = False
         self.t1 = threading.Thread(target=self.CheckAI)
-        pygame.init()
+        pygame.init() #initialises pygame
 
     def event_manager(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.check_ai = False
+        """
+        primary function of the controller that uses the 'for event in pygame.event.get()' in order to constantly check for user input
+        once a user input is detected, a lengthened if-elif statement is conducted to account for all valid inputs at a given time
+
+        """
+
+        for event in pygame.event.get(): #constantly checks for events for pygame to use
+            if event.type == pygame.QUIT: #if the x in the top right of the window is pressed
+                self.check_ai = False #end both loops which closes the window and ends the game
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    # Return to the menu
                     if self.rulessetup == True:
                         self.rules_screen = False
                         self.menu_screen = True
                         self.rulessetup = False
-                        self.view.DrawMenu()
+                        self.view.DrawMenu() #sets the appropriate variables to true and false then redraws the main menu
                     elif self.setup_screen == True:
                         self.setup_screen_screen = False
                         self.menu_screen = True
-                        self.view.DrawMenu()
+                        self.view.DrawMenu() #sets the appropriate variables to true and false then redraws the main menu
 
-                if event.key == pygame.K_SPACE and self.setup_screen:
+                if event.key == pygame.K_SPACE and self.setup_screen: #if space is pressed on the game setup menu
                     self.model.GameStartLogic()
                     self.view.DrawBoard(pygame.mouse.get_pos())
                     self.rules_screen = False
                     self.menu_screen = False
                     self.setup_screen = False
                     if self.threads == 0:
-                        self.t1.start()
+                        self.t1.start() #initialises the t1 thread
                         self.threads = 1
 
-            if pygame.mouse.get_pressed()[0] == True:
-                if self.menu_screen: # if on start screen
-                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275:
+            if pygame.mouse.get_pressed()[0] == True: #if mouse 1 is pressed
+                if self.menu_screen:
+                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275: #if pressed in the bounds of the start button
                         self.view.DrawSetup()
                         self.setup_screen = True
                         self.menu_screen = False 
                         
-                    elif 275 < pygame.mouse.get_pos()[1] < 412.5: # rules
+                    elif 275 < pygame.mouse.get_pos()[1] < 412.5: # if pressed in the bounds of the rules button
                         self.menu_screen = False
                         self.setup_screen = True
                         self.rulessetup = True
                         self.view.DrawRulesSetup()
 
-                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[1] < 550:
+                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[1] < 550: #if pressed in bounds fo quit button
                         self.running = False
 
                 elif self.rulessetup == True:
-                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] < 150: #One
-                        self.view.DrawRules('1')
-                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 150: #Two
-                        self.view.DrawRules('2') 
-                    if pygame.mouse.get_pos()[1] > 275 and pygame.mouse.get_pos()[1] < 412.5 and pygame.mouse.get_pos()[0] < 150: #Three
-                        self.view.DrawRules('3')
-                    if pygame.mouse.get_pos()[1] > 275 and pygame.mouse.get_pos()[1] < 412.5 and pygame.mouse.get_pos()[0] > 150: #Three
-                        self.view.DrawRules('4')
+                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] < 150: #One player game
+                        self.view.DrawRulesForPlayer('1') 
+                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 150: #Two player game
+                        self.view.DrawRulesForPlayer('2') 
+                    if pygame.mouse.get_pos()[1] > 275 and pygame.mouse.get_pos()[1] < 412.5 and pygame.mouse.get_pos()[0] < 150: #Three player game
+                        self.view.DrawRulesForPlayer('3')
+                    if pygame.mouse.get_pos()[1] > 275 and pygame.mouse.get_pos()[1] < 412.5 and pygame.mouse.get_pos()[0] > 150: #Four player game
+                        self.view.DrawRulesForPlayer('4')
 
                 elif self.setup_screen == True:
-                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] < 75: #1
+                    if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] < 75: #1 player game
                         self.model.playerCount = 1
                         self.one_player = True
                         self.view.black_bar = True
-                        self.view.PasteImage(self.view.one_img, 0, 0)
-                        self.view.PasteImage(self.view.no_img, -1.3, 327)
-                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 75 and pygame.mouse.get_pos()[0] < 150: #2
+                        self.view.PasteImage(self.view.one_img, 0, 0) #highlight the clicked number
+                        self.view.PasteImage(self.view.no_img, -1.3, 327) #highlight "N"
+                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 75 and pygame.mouse.get_pos()[0] < 150: #2 player game
                         self.model.playerCount = 2
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.two_img, -1, 0)
-                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 150 and pygame.mouse.get_pos()[0] < 225: #3
+                        self.view.PasteImage(self.view.two_img, -1, 0) #highlight the clicked number
+                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 150 and pygame.mouse.get_pos()[0] < 225: #3 player game
                         self.model.playerCount = 3
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.three_img, -1, 0)
-                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 225: #4
+                        self.view.PasteImage(self.view.three_img, -1, 0) #highlight the clicked number
+                    elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 225: #4 player game
                         self.model.playerCount = 4
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.four_img, 0, 0)
-                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] < 150 and self.one_player == False: #Yes
+                        self.view.PasteImage(self.view.four_img, 0, 0) #highlight the clicked number
+                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] < 150 and self.one_player == False: #"Y", include AI in the game
                         self.model.AiPlayer = True
-                        self.view.PasteImage(self.view.yes_img, 1.3, 333)
-                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] > 150: #No
+                        self.view.PasteImage(self.view.yes_img, 1.3, 333) #highlight "Y"
+                    elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] > 150: #"N", do not include AI in the game
                         self.model.AiPlayer = False
-                        self.view.PasteImage(self.view.no_img, -1.3, 327)
+                        self.view.PasteImage(self.view.no_img, -1.3, 327) #highlight "N"
 
                 else:
-                    if self.model.game["END SCREEN"] == True:
-                        self.view.DrawMenu()
+                    if self.model.game["END SCREEN"] == True: #if on the game over screen
+                        self.view.DrawMenu() #return to the menu
                         self.model.game["END SCREEN"] = False
                         self.menu_screen = True
-                    if self.model.PlayerIsHuman():
-                        self.model.Clicking(self.model.Board, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+                    if self.model.PlayerIsHuman(): #if the current player's turn is a human player
+                        self.model.Clicking(self.model.Board, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]) #register a click
                         pygame.display.update()
-                        if self.model.NoLegalMoves(self.model.Board, self.model.playerColour[self.model.game['turn']]):
-                            self.model.CycleThruPlayerTurns()
                         if  self.menu_screen == False:
-                            self.view.DrawBoard(pygame.mouse.get_pos())
+                            self.view.DrawBoard(pygame.mouse.get_pos()) #update the board so the player can see the highlighted tiles
                       
 
     def CheckAI(self):
+        """
+        Function used to check whether the game is over, 
+        if a player's turn should be skipped, 
+        and to check whether it is currently the AI player's turn, in which case, run AI
+        """
         while self.check_ai:
-            time.sleep(0.001)
+            time.sleep(0.001) 
             if (self.model.NoLegalMoves(self.model.Board, "any")) or (self.model.TwoPiecesInScoringZone(self.model.Board)):
                 time.sleep(1)
-                print("game over")
                 self.model.game['GAMEOVER'] = True
                 self.view.DrawGameOver() #if the game is over
                 time.sleep(0.1)
@@ -138,13 +165,22 @@ class Controller:
                 self.view.DrawBoard(pygame.mouse.get_pos())
 
             elif not self.model.NoLegalMoves(self.model.Board, self.model.playerColour[self.model.game['turn']]) and not self.model.PlayerIsHuman() and (self.model.game['GAMEOVER'] == False):
-                print("   IS THE GAME SUPPOSED TO BE OVER", self.model.NoLegalMoves(self.model.Board, "any"), self.model.TwoPiecesInScoringZone(self.model.Board))
                 time.sleep(0.1)
                 self.RunAI()
                 time.sleep(0.1)
 
 
     def RunAI(self):
+        """
+        Function that attempts to call minimax
+        if minimax is uncallable, skip the current turn
+
+        List of variables:
+        InputX (int): the x (row) coordinate of the piece the minimax funtion wants to move
+        InputY1 (int): the y coordinate of the piece the minimax funtion wants to move
+        InputY2 (int): the y coordinate of the minimax function's chosen move
+
+        """
         InputX, InputY1, InputY2 = None, None, None
         try:
             InputX, InputY1, InputY2 = self.ConvertMinimaxToInputs() #calls minimax within the function and then puts the algorithms move into a trio of varialbes
@@ -160,17 +196,26 @@ class Controller:
                 self.view.DrawBoard(pygame.mouse.get_pos())
 
     def ConvertMinimaxToInputs(self):
-        
+        """
+        Function used to actually call Minimax
+        It mainly takes the minimax return values and turns them into values that can be used by the self.model.MakeMove() function 
+        this allows the AI player to make their move on the actual game board
+
+
+        Returns:
+            returns InputX, InputY1
+
+        List of variables:
+            InputX (int): the x (row) coordinate of the piece the minimax funtion wants to move
+            InputY1 (int): the y coordinate of the piece the minimax funtion wants to move
+            InputY2 (int): the y coordinate of the minimax function's chosen move
+        """
         InputX, InputY1, InputY2 = None, None, None
         if not self.model.PlayerIsHuman():
             try:
-                evaluation, pos2 = self.model.Minimax(self.model.Board, 2, True, self.model.game['turn'], -999, 999, False)
-                
-                for i, char in enumerate(self.model.minimax_pos):
-                    print(f"pos {i} == {self.model.minimax_pos[i]}")
+                evaluation, pos2 = self.model.Minimax(self.model.Board, 100, True, self.model.game['turn'], -999, 999, False)
                 
                 pos = self.model.minimax_pos[-1:][0]
-                print("pos ", pos)
                 for row_index, row in enumerate(self.model.Board):
                     for coloumn_index, coloumn in enumerate(self.model.Board[row_index]):
                         if self.model.Board[row_index][coloumn_index] != pos[row_index][coloumn_index]:

@@ -375,7 +375,7 @@ class UpThrustBoard():
                 #print(f"two- {alpha} - {max(max_eval, minimax_eval)}")
                 alpha = max(alpha, minimax_eval)
                 if beta <= alpha:
-                    #print("beta < = alpha")
+                    print("beta < = alpha")
                     break
             return max_eval, position
         
@@ -395,8 +395,8 @@ class UpThrustBoard():
                 min_eval = min(min_eval, minimax_eval)
                 beta = min(beta, minimax_eval)
                 if beta <= alpha:
+                    print("beta < = alpha")
                     break
-                    #print("beta < = alpha")
             return min_eval, position   
 
     def MinimaxPositionAppend(self, pos1, pos2):
