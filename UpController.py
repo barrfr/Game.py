@@ -212,33 +212,25 @@ class Controller:
         """
         InputX, InputY1, InputY2 = None, None, None
         if not self.model.PlayerIsHuman():
-            try:
-                evaluation, pos2 = self.model.Minimax(self.model.Board, 100, True, self.model.game['turn'], -999, 999, False)
-                
-                pos = self.model.minimax_pos[-1:][0]
-                for row_index, row in enumerate(self.model.Board):
-                    for coloumn_index, coloumn in enumerate(self.model.Board[row_index]):
-                        if self.model.Board[row_index][coloumn_index] != pos[row_index][coloumn_index]:
-                            if self.model.Board[row_index][coloumn_index] == "":
-                                InputY2, InputX = row_index, coloumn_index
+            #try:
+            self.model.cpu.playercount = len(self.model.cpu.players)
+            print("minimax attempted")
+            evaluation, position = self.model.cpu.Minimax(self.model.Board, 3, True, 0, -9999, 9999)
+            print("minimax ended")
+            for Rindex, row in enumerate(self.model.Board):
+                for Eindex, element in enumerate(self.model.Board[Rindex]):
+                    if self.model.Board[Rindex][Eindex] != position[Rindex][Eindex]:
+                        if self.model.Board[Rindex][Eindex] == "":
+                                InputY2, InputX = Rindex, Eindex
                                 
-                            elif self.model.Board[row_index][coloumn_index] != "":
-                                InputY1 = row_index
-                                if self.model.Board[row_index][coloumn_index] != self.model.playerColour[self.model.game['turn']]: 
-                                    if self.model.Board[row_index][coloumn_index] == 'G' and (self.model.GFree == True or self.model.TFree == True):
-                                        InputY1 = row_index
-                                        return InputX, InputY1, InputY2
-                                    
-                                    else:
-                                        InputX, InputY2, InputY1 = None, None, None
-                                      
-                if not self.model.ColourAiPlayers[self.model.Board[InputY1][InputX]]:
-                    return
-                            
-                return InputX, InputY1, InputY2
-                
-            except:
-                return 
+                        elif self.model.Board[Rindex][Eindex] != "":
+                            InputY1 = Rindex
+            return InputX, InputY1, InputY2
+
+
+            #except:
+                #print("except")
+                #return 
                 
         else:
             return 999, 999, 999

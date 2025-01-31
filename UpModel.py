@@ -2,7 +2,9 @@ from copy import deepcopy
 
 class UpThrustBoard():
     
-    def __init__(self):
+    def __init__(self, cpu):
+        self.cpu = cpu
+        self.positions = []
         self.player_count_for_legal_moves = {1:16, 2:8, 3:8, 4:4}
         self.GFree = False
         self.TFree = False
@@ -91,7 +93,7 @@ class UpThrustBoard():
                             0,
                             0]
         self.k = 2
-        self.BoardScore = [100*self.k**2, 
+        self.BoardScore = [120*self.k**2, 
                       81*self.k**2,
                       64*self.k**2, 
                       49*self.k**2,
@@ -136,19 +138,7 @@ class UpThrustBoard():
         '''
         This function cycles the player turn *within* the minimax function so that it knows which player's pieces it should simulate moving
         '''
-        if self.playerCount == 4:
-            turn = (turn+1)%4
-                
-        if self.playerCount == 3:
-            turn = (turn+1)%3
-
-        if self.playerCount == 2:
-            turn = (turn+1)%2
-
-        if self.playerCount == 1:
-            turn = 1
-        
-        return turn
+        return (turn+1)%self.playerCount
 
     def SkipPlayerTurn(self):
         if self.NoLegalMoves(self.Board, self.playerColour[self.game['turn']]):
@@ -198,8 +188,6 @@ class UpThrustBoard():
             return True
         else:
             return False
-
-
     
     def FurthestForwardsAndMovingOnePlace(self, char, InputX, InputY1, InputY2, board):
        #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
@@ -351,11 +339,13 @@ class UpThrustBoard():
     """
 
     def Minimax(self, position, depth, maximisingPlayer, currentTurn, alpha, beta, gameover):
+        self.positions.append([self.evaluate(position), position])
         #print(f"{beta} {alpha}")
         if depth == 0 or gameover:
             #print(f"depth 0 = {depth}, gameover {gameover}")
             return self.evaluate(position), position
         if maximisingPlayer:
+            print("max")
             max_eval = -999
             child_positions = self.GetChildren(position, currentTurn)
             if child_positions == []:
@@ -366,6 +356,7 @@ class UpThrustBoard():
                 if child[-1] == "gameover":
                     print("gameover")
                     minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn), alpha, beta, True)
+                    break
 
                 minimax_eval, minimax_pos = 0, []
                 minimax_eval, minimax_pos = self.Minimax(child[0], depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn), alpha, beta, False)
@@ -380,16 +371,16 @@ class UpThrustBoard():
             return max_eval, position
         
         else:
+            print("min")
             min_eval = 999
             child_positions = self.GetChildren(position, currentTurn)
             if child_positions == []:
                 minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn), alpha, beta, False)
             for child in child_positions:
-
                 if child[-1] == "gameover":
                     print("gameover")
                     minimax_eval, minimax_pos = self.Minimax(position, depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn), alpha, beta, True)
-
+                    break
                 minimax_eval, minimax_pos = self.Minimax(child[0], depth - 1, self.maximisingPlayer(currentTurn), self.CycleThruMiniTurns(currentTurn), alpha, beta, False)
                 self.MinimaxPositionAppend(position, minimax_pos)
                 min_eval = min(min_eval, minimax_eval)
@@ -420,7 +411,7 @@ class UpThrustBoard():
         minimoves = []
         for index_row, row in enumerate(position):
             for index_element, element in enumerate(row):
-                if self.IsPlayersPiece(index_element, index_row):
+                if position[index_row][index_element] == self.playerColour[currentTurn]:
                     y2 = self.FindY2(index_row, position)
                     if self.LegalMove(index_element, index_row, y2, position):
                         Board2 = deepcopy(position) 
@@ -465,8 +456,10 @@ class UpThrustBoard():
     def maximisingPlayer(self, prev_turn):
 
         if self.playerCount == 4:
+            print(f"prev_turn = {prev_turn}")
             if prev_turn == 3:
                 return True
+
 
         if self.playerCount == 3:
             if prev_turn == 2:
@@ -594,6 +587,8 @@ class UpThrustBoard():
         self.board += [lst[:i] + lst[i:] for i in range(4)]
 
         if self.playerCount == 4:
+            self.cpu.players = ["Y", "R", "B", "G"]
+            self.cpu.twoplayers = [None, None, None, None] 
             self.free_colours = {}
             if self.AiPlayer == True:
                 self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
@@ -604,6 +599,8 @@ class UpThrustBoard():
                 self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':False}
 
         if self.playerCount == 3:
+            self.cpu.players = ["Y", "R", "B"]
+            self.cpu.twoplayers = ["G", None, None]         
             self.GFree = True
             if self.AiPlayer == True:
                 self.AiPlayers = {1:False, 2:False, 0:True}
@@ -614,6 +611,9 @@ class UpThrustBoard():
                 self.ColourAiPlayers = {'R':False, 'B':False, 'Y':False}
         
         if self.playerCount == 2:
+            self.cpu.players = ["Y", "R"]
+            self.cpu.twoplayers = ["G", "B"]
+            self.cpu.playercount = 2
             self.TFree = True
             if self.AiPlayer == True:
                 self.AiPlayers = {1:False, 0:True}
@@ -627,7 +627,23 @@ class UpThrustBoard():
             self.free_colours = {1:'B', 1:'G', 1:'Y'}
             self.AiPlayers = {1:False}
             self.ColourAiPlayers = {'R':False}
-
             
+    def PositionPrint(self, primary_list):
+        with open("output.txt", "w") as file:
+            for secondary_list in primary_list:
+                # Extract the integer and corresponding board
+                integer = secondary_list[0]
+                board = secondary_list[1]
+                
+                # Write the integer to the file
+                file.write(f"Integer: {integer}\n")
+                file.write("Board:\n")
+                
+                # Write each inner list of the board on a new line
+                for row in board:
+                    file.write(f"{row}\n")
+                
+                # Add a blank line between different secondary lists for readability
+                file.write("\n")        
         
       
