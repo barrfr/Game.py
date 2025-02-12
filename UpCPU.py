@@ -1,6 +1,19 @@
 from copy import deepcopy
 class Minimax():
     def __init__(self, players):
+        """
+        Initialization function of the Minimax Class
+
+        Args:
+            players: list containing the players for a given game in the form ["Y", "R", "B", "G"]
+
+        List of variables:
+            self.k (int): adjustable variable for the heuristic function
+            self.BoardScore (list): used by the heuristic function to value each row of the board
+            self.twoplayers (list): used for finding the children of a position in a two player game
+            self.players (list): self.players = players
+            self.playercount (int): uses the player list to calculate the playercount
+        """
         with open("output.txt", "w") as f:
             f.write("")
         with open("outputChildren.txt", "w") as g:
@@ -34,50 +47,46 @@ class Minimax():
     #    self.playercount = count
 
     def Minimax(self, position, depth, maximisingPlayer, currentTurn, alpha, beta):
-        print(f"minimax started DEPTH: {depth}")
-        print(f"players {self.players}")
-        self.PrintMinimax(depth, alpha, beta, currentTurn, maximisingPlayer, position, self.EvaluatePos(position))
+        """
+        Actual Minimax function which builds a tree in order to find the best move, where it returns the move and evaluation
+
+        Args:
+            position (2Dlist): the current board state
+            depth (int): represents how deep the minimax is 
+            maximisingPlayer (bool): True or False for if the current player's
+
+        List of variables:
+
+
+        """
+        #self.PrintMinimax(depth, alpha, beta, currentTurn, maximisingPlayer, position, self.EvaluatePos(position))
         if depth == 0 or self.GameOver(position):
-            print("depth == 0")
             return self.EvaluatePos(position), position
-        print("1")
         if maximisingPlayer:
-            max_eval = -999
-            print("just before calculating children")
+            best_move = None
+            max_eval = float('-inf')
             children =  self.ChildPositions(position, currentTurn)
-            print("after calcing children")
             if not children:
-                print("if children empty, return")
                 return self.EvaluatePos(position), position
-            print("2")
             for child in children:
-                print("for child in children")
                 evaluation, z = self.Minimax(child, depth-1, False, self.cycleTurn(currentTurn), alpha, beta)
-                print("evaluation, z =")
                 
                 if max_eval != max(max_eval, evaluation):
                     best_move = child
                     max_eval = max(max_eval, evaluation)
                 
-                print("after2")
                 alpha = max(alpha, evaluation)
-                print("after3")
                 if beta <= alpha:
-                    print("after4")
                     break
-            self.PrintReturning(depth, alpha, beta, max_eval, evaluation)
+            #self.PrintReturning(depth, alpha, beta, max_eval, evaluation)
             return max_eval, best_move
 
         else:
-            print("3")
-            min_eval = 999
-            print("child abt tpo be calced min")
+            best_move = None
+            min_eval = float('inf')
             children =  self.ChildPositions(position, currentTurn)
-            print("child calced min")
             if not children:
-                print("if children empty min")
                 return self.EvaluatePos(position), position
-
             for child in children:
                 evaluation, z = self.Minimax(child, depth-1, self.MaxingPlayer(currentTurn), self.cycleTurn(currentTurn), alpha, beta)
                
@@ -85,13 +94,10 @@ class Minimax():
                     best_move = child
                     min_eval = min(min_eval, evaluation)
 
-                best_move = child
                 beta = min(beta, evaluation)
-                print("beta min")
                 if beta <= alpha:
-                    print("beta <= alpja")
                     break
-            self.PrintReturning(depth, alpha, beta, min_eval, evaluation)
+            #self.PrintReturning(depth, alpha, beta, min_eval, evaluation)
             return min_eval, best_move
             
     def ChildPositions(self, position, current_turn):
@@ -99,12 +105,11 @@ class Minimax():
         for Rindex, row in enumerate(position):
             for Eindex, element in enumerate(row):
                 if (element == self.players[current_turn] or element == self.twoplayers[current_turn]) and self.LegalMove(Eindex, Rindex, self.FindY2(Rindex, position), position):
-                    #print(element)
                     moved_position = deepcopy(position)
                     moved_position = self.MakeMove(moved_position, Eindex, Rindex, self.FindY2(Rindex, moved_position)) #it should RETURN a NEW BOARD: you must do copy
                     position_list.append(moved_position)
 
-        self.PrintChildren(position_list)
+        #self.PrintChildren(position_list)
         return position_list
 
     def EvaluatePos(self, position):
@@ -112,7 +117,6 @@ class Minimax():
         for Rindex, row in enumerate(position):
             for element in row:
                 if self.playercount == 3 and element == "G":
-                    print(f"self.BoardScore[Rindex]*3 {(self.BoardScore[Rindex])**3}")
                     score -= (self.BoardScore[Rindex])*3
                 elif element == "Y" or (self.playercount == 2 and element == "G"):
                     score += self.BoardScore[Rindex]
@@ -121,20 +125,12 @@ class Minimax():
         return score
 
     def MaxingPlayer(self, currentTurn):
-        print("maxing deez")
         next_turn = self.cycleTurn(currentTurn)
-        print("deez what")
-        print(f"players {self.players}")
-        print(f"next_turn {next_turn}")
         if self.players[next_turn] == "Y":
-            print("deez nuts true")
             return True
-        print("deez nuts false")
         return False
 
     def cycleTurn(self, currentTurn):
-        print(f"current turn {currentTurn}")
-        print(f"self.playercount {self.playercount}")
         return (currentTurn+1)%self.playercount
 
     def GameOver(self, position):
@@ -148,22 +144,7 @@ class Minimax():
 
         return True
 
-    def LegalMove(self, InputX, InputY1, InputY2, board):
-        """
-        1. A piece must move exactly as how many space up as there are pieces in the horisontal row from which it departs. (Thus, if there are two pieces in a row, either piece may move up exactly two spaces, after one piece is moved, the other may only move up one space since it has become the solitary piece in the row)
-        2. Only one piece may occupy a space, pieces may jump over other pieces, as long as they land on empty spaces
-        3. The most advanced piece of a colour may not make a single space move. (Therefore a piece that is alone in a row cannot move if the other three pieces of the same colour are below it on the board).
-        4. On any of the bottom six rows of the board, (the non scoring rows) two pieces of the same colour may NEVER be in the same row at the time. This restriction does not apply to the five scoring rows.
-        """
-        if (board[InputY2][InputX] == "" and 
-            board[InputY1][InputX] != "" and 
-            not self.FurthestForwardsAndMovingOnePlace(board[InputY1][InputX], InputX, InputY1, InputY2, board) and 
-            self.NumberOfPiecesInLane(InputY1, board) == InputY1 - InputY2 and 
-            self.MatchingColours(board[InputY1][InputX], InputX, InputY2, board)):
-            return True
-        return False
-
-    def FurthestForwardsAndMovingOnePlace(self, char, InputX, InputY1, InputY2, board):
+    def FurthestForwardsAndMovingOnePlace(char, InputX, InputY1, InputY2, board):
        #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
         if (InputY1 - InputY2 == 1) and (self.IsFurthestForwards(char, InputX, InputY1, board)):
             return True
@@ -182,15 +163,15 @@ class Minimax():
         else:
             return False
 
-    def NumberOfPiecesInLane(self, InputY1, board):
+    def NumberOfPiecesInLane(InputY1, board):
         counter = 4
         for char in board[InputY1]:
             if char == "":
                 counter -= 1
         return counter
 
-    def MatchingColours(self, char, InputX, InputY2, board):
-        if InputY2 > 4 or self.playercount == 1: 
+    def MatchingColours(char, InputX, InputY2, board):
+        if InputY2 > 4 or Minimax.playercount == 1: 
             for element in board[InputY2]:
                 if element == char:
                     return False
@@ -219,11 +200,29 @@ class Minimax():
                 number_of_pieces_in_row += 1   
         return (max(InputY1 - number_of_pieces_in_row, 0))
 
-                
-    def MakeMove(self, board, InputX, InputY1, InputY2):
+    @staticmethod           
+    def MakeMove(board, InputX, InputY1, InputY2):
         board[InputY2][InputX] = board[InputY1][InputX]
         board[InputY1][InputX] = ""
         return board
+    
+    @staticmethod  
+    def LegalMove(InputX, InputY1, InputY2, board):   
+        """
+        1. A piece must move exactly as how many space up as there are pieces in the horisontal row from which it departs. (Thus, if there are two pieces in a row, either piece may move up exactly two spaces, after one piece is moved, the other may only move up one space since it has become the solitary piece in the row)
+        2. Only one piece may occupy a space, pieces may jump over other pieces, as long as they land on empty spaces
+        3. The most advanced piece of a colour may not make a single space move. (Therefore a piece that is alone in a row cannot move if the other three pieces of the same colour are below it on the board).
+        4. On any of the bottom six rows of the board, (the non scoring rows) two pieces of the same colour may NEVER be in the same row at the time. This restriction does not apply to the five scoring rows.
+        """
+        if (board[InputY2][InputX] == "" and 
+            board[InputY1][InputX] != "" and 
+            not Minimax.FurthestForwardsAndMovingOnePlace(board[InputY1][InputX], InputX, InputY1, InputY2, board) and 
+            Minimax.NumberOfPiecesInLane(InputY1, board) == InputY1 - InputY2 and 
+            Minimax.MatchingColours(board[InputY1][InputX], InputX, InputY2, board)):
+            print("return true")
+            return True
+        print("return false")
+        return False
 
     def PrintMinimax(self, depth, alpha, beta, turn, maximizing_player, position, score):
         with open("output.txt", "a") as f:  # Append to keep logs from multiple calls
@@ -259,3 +258,20 @@ class Minimax():
             f.write(f"Max Eval: {max_eval}\n")
             f.write(f"Score: {score}\n")
             f.write("-" * 30 + "\n\n")  # Separator for readability
+
+def MinimaxMove(func):
+    def wrapper(self, board, InputX, InputY1, InputY2):
+        print(f"- {board, InputX, InputY1, InputY2} -")
+        print("minimax move returned")
+        board = Minimax.MakeMove(board, InputX, InputY1, InputY2)
+        return board
+    print("wrapper returned")
+    return wrapper
+
+def LegalCheck(func):
+    def wrapper(self, InputX, InputY1, InputY2, board):
+        print("wrapping")
+        islegal = Minimax.LegalMove(InputX, InputY1, InputY2, board)
+        print("islegal obtained")
+        return islegal
+    return wrapper

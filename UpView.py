@@ -68,11 +68,11 @@ class View():
     return black
 
   def DrawSetup(self):
-    Img(0, 0, self.menu_img, self.menu_scale, self.screen)
+    Img(0, 0, self.menu_img, 300/381, self.screen, 550/685)
     pygame.display.update()
 
-  def PasteImage(self, filename, x, y):
-    Img(x, y, filename, self.menu_scale, self.screen)
+  def PasteImage(self, filename, x, y, scaleX, scaleY):
+    Img(x, y, filename, scaleX, self.screen, scaleY)
     pygame.display.update()
 
   def DrawRulesSetup(self):
@@ -124,32 +124,41 @@ class View():
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
-    start_button = Img(0, 0, self.start_img, 0.52, self.screen)
+    start_button = Img(0, 0, self.start_img, 300/604, self.screen, 550/1079)
     
     pygame.display.update()
-
-  def DrawPieces(self, x, y, character, selected, i, j):
+  def DrawHighlighted(self, x, y, selected, i, j):
     if selected is None:
       pass
-
     elif selected[0] == i and selected[1] == j:
       pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5 - ((self.SCREEN_HEIGHT/11)*self.model.ViewFindY2(i, self.model.Board)+1.5), self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
       pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5, self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
-      pygame.draw.circle(self.screen, black, (x, y), 10)
+      pygame.draw.circle(self.screen, black, (x, y), 20)
       pygame.display.update()
 
+  def DrawPieces(self, x, y, character, selected, i, j):
+    
     """circle(surface, color, center, radius)"""
     if character == 'R':
+      pygame.draw.circle(self.screen, black, (x, y), 12)
+      self.DrawHighlighted(x, y, selected, i, j)
       pygame.draw.circle(self.screen, red, (x, y), 10)
 
     elif character == 'G':
+      pygame.draw.circle(self.screen, black, (x, y), 12)
+      self.DrawHighlighted(x, y, selected, i, j)
       pygame.draw.circle(self.screen, green, (x, y), 10)
 
     elif character == 'B':
+      pygame.draw.circle(self.screen, black, (x, y), 12)
+      self.DrawHighlighted(x, y, selected, i, j)
       pygame.draw.circle(self.screen, blue, (x, y), 10)
 
     elif character == 'Y':
+      pygame.draw.circle(self.screen, black, (x, y), 12)
+      self.DrawHighlighted(x, y, selected, i, j)
       pygame.draw.circle(self.screen, yellow, (x, y), 10)
+
 
 
   def GetY(self): 
@@ -191,24 +200,33 @@ class View():
 
 
   def DrawGrid(self):
+    
     color = self.BarColouration()
-
+    barwidth = 2
     #drawing the rows
     for row in range(1, 11):
+      # """ rect(surface, color, rect, width) """
+      # pygame.draw.rect(self.screen, black, (0, row * self.SCREEN_HEIGHT/11, self.SCREEN_WIDTH, row * self.SCREEN_HEIGHT/11), barwidth)
+    
       """line(surface, color, start_pos, end_pos)"""
       pygame.draw.line(self.screen, color, (0, row * self.SCREEN_HEIGHT/11), (self.SCREEN_WIDTH, row * self.SCREEN_HEIGHT/11))
-    
+      pygame.draw.line(self.screen, black, (0, row * (self.SCREEN_HEIGHT/11)+1), (self.SCREEN_WIDTH, row * (self.SCREEN_HEIGHT/11)+1))
+      
     
     #drawing the columns
     for column in range(1,4):
+      # """ rect(surface, color, rect, width) """
+      # pygame.draw.rect(self.screen, black, (column * self.SCREEN_WIDTH/4, 0, column * self.SCREEN_WIDTH/4 + 1, self.SCREEN_HEIGHT), barwidth)
+    
       """line(surface, color, start_pos, end_pos)"""
       pygame.draw.line(self.screen, color, (column * self.SCREEN_WIDTH/4, 0), (column * self.SCREEN_WIDTH/4, self.SCREEN_HEIGHT))
+      pygame.draw.line(self.screen, black, (column * (self.SCREEN_WIDTH/4)+1, 0), (column * (self.SCREEN_WIDTH/4)+1, self.SCREEN_HEIGHT))
     pygame.display.update()
       
     
 
 class Img():
-    def __init__(self, x, y, image, scale, surface):
+    def __init__(self, x, y, image, scaleX, surface, scaleY=0):
         """
         creates a button at the x and y coordinates given,
         it puts the image you enter as a parameter as the button itself,
@@ -216,7 +234,9 @@ class Img():
         """
         width = image.get_width()
         height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+        if scaleY == 0:
+          scaleY = scaleX
+        self.image = pygame.transform.scale(image, (int(width * scaleX), int(height * scaleY)))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         surface.blit(self.image, (x, y))

@@ -1,4 +1,6 @@
 from copy import deepcopy
+from UpCPU import MinimaxMove
+from UpCPU import LegalCheck
 
 class UpThrustBoard():
     
@@ -54,7 +56,7 @@ class UpThrustBoard():
         #board += [lst[:i] + lst[i:] for i in range(4)]
         self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
         self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
-        
+        """
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
@@ -67,18 +69,17 @@ class UpThrustBoard():
                       ["G", "R", "B", "Y"],
                       ["R", "B", "Y", "G"]]
         """
-        self.Board = [["Y", "G", "R", "B"], 
-                      ["B", "R", "G", "Y"], 
-                      ["G", "B", "Y", "R"],
-                      ["", "", "", ""],
-                      ["", "", "", ""],
+        self.Board = [["", "", "", ""], 
                       ["", "", "", ""], 
-                      ["", "Y", "B", ""],
                       ["", "", "", ""],
-                      ["R", "", "", "G"],
-                      ["", "", "", ""],
-                      ["", "", "", ""]]
-        """
+                      ["", "Y", "", "R"],
+                      ["B", "", "R", ""],
+                      ["", "", "", "B"], 
+                      ["", "G", "Y", ""],
+                      ["R", "", "G", ""],
+                      ["Y", "", "", ""],
+                      ["G", "R", "B", "Y"],
+                      ["", "B", "", "G"]]
 
         
         self.final_score = [60,
@@ -148,20 +149,13 @@ class UpThrustBoard():
         MOVE MANAGEMENT 
     """
 
-    def MakeMove(self, InputX, InputY1, InputY2):
-        if self.LegalMove(InputX, InputY1, InputY2, self.Board) and self.IsPlayersPiece(InputX, InputY1):
-            '''
-            self.moves is a list of the last 10 moves, and it allows the player to take a move back 10 times
-            its not very good, as taking a move back in a 4 player game is strange, but I wrote the code ages ago and am keeping it around just in case
-            '''
-            
-            self.moves.append([InputY1, InputX, InputY2])
-            self.moves.pop(0)
-            
-            #makes the element at the start coordinates equal an empty tile, and puts the letter of the piece into the end coordinates
-            self.Board[InputY2][InputX] = self.Board[InputY1][InputX]
-            self.Board[InputY1][InputX] = ""
-            self.CycleThruPlayerTurns()
+    @MinimaxMove
+    def MakeMove(self, board, InputX, InputY1, InputY2):
+        pass
+    
+    @LegalCheck
+    def LegalityCheck(self, InputX, InputY1, InputY2, board):
+        pass
 
     def RetractMove(self, InputX, InputY1, InputY2):
         self.Board[self.moves[9][0]][self.moves[9][1]] = self.Board[self.moves[9][2]][self.moves[9][1]] 
@@ -170,24 +164,6 @@ class UpThrustBoard():
     """ 
         LEGALITY MANAGEMENT
     """
-    def LegalMove(self, InputX, InputY1, InputY2, board):
-        
-        """
-        1. A piece must move exactly as how many space up as there are pieces in the horisontal row from which it departs. (Thus, if there are two pieces in a row, either piece may move up exactly two spaces, after one piece is moved, the other may only move up one space since it has become the solitary piece in the row)
-        2. Only one piece may occupy a space, pieces may jump over other pieces, as long as they land on empty spaces
-        3. The most advanced piece of a colour may not make a single space move. (Therefore a piece that is alone in a row cannot move if the other three pieces of the same colour are below it on the board).
-        4. On any of the bottom six rows of the board, (the non scoring rows) two pieces of the same colour may NEVER be in the same row at the time. This restriction does not apply to the five scoring rows.
-        """
-
-        if (board[InputY2][InputX] == "" and 
-            board[InputY1][InputX] != "" and 
-            not self.FurthestForwardsAndMovingOnePlace(board[InputY1][InputX], InputX, InputY1, InputY2, board) and 
-            self.NumberOfPiecesInLane(InputY1, board) == InputY1 - InputY2 and 
-            self.MatchingColours(board[InputY1][InputX], InputX, InputY2, board)):
-
-            return True
-        else:
-            return False
     
     def FurthestForwardsAndMovingOnePlace(self, char, InputX, InputY1, InputY2, board):
        #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
@@ -246,7 +222,7 @@ class UpThrustBoard():
             for index, line in enumerate(board):
                 for locus, char in enumerate(line):
                     if char != "":
-                        if self.LegalMove(locus, index, self.FindY2(index, board), board) == True:
+                        if self.LegalityCheck(locus, index, self.FindY2(index, board), board) == True:
                             pass
                         else:
                             number_of_legal_moves -= 1
@@ -256,7 +232,7 @@ class UpThrustBoard():
             for index, line in enumerate(board):
                 for locus, char in enumerate(line):
                     if self.IsPlayersPiece(locus, index):
-                        if self.LegalMove(locus, index, self.FindY2(index, board), board) == True:
+                        if self.LegalityCheck(locus, index, self.FindY2(index, board), board) == True:
                             pass
                         else:
                             number_of_legal_moves -= 1
@@ -307,8 +283,9 @@ class UpThrustBoard():
                 self.selected_coor = None
 
 
-            elif self.LegalMove(self.col, self.row, self.why_two, board) and row == self.why_two and col == self.col:
-                self.MakeMove(self.col, self.row, self.why_two)
+            elif self.LegalityCheck(self.col, self.row, self.why_two, board) and row == self.why_two and col == self.col:
+                self.Board = self.MakeMove(self.Board, self.col, self.row, self.why_two)
+                self.CycleThruPlayerTurns()
                 self.selected_coor = None
                 self.selected_piece = None
                 
@@ -342,6 +319,7 @@ class UpThrustBoard():
         self.positions.append([self.evaluate(position), position])
         #print(f"{beta} {alpha}")
         if depth == 0 or gameover:
+            print(f"returned {gameover, depth}")
             #print(f"depth 0 = {depth}, gameover {gameover}")
             return self.evaluate(position), position
         if maximisingPlayer:
@@ -402,10 +380,14 @@ class UpThrustBoard():
                         elif pos1[row_index][coloumn_index] != "":
                             InputY1 = row_index
 
-        if self.LegalMove(InputX, InputY1, InputY2, pos1) == True:
+        if self.LegalityCheck(InputX, InputY1, InputY2, pos1) == True:
             self.minimax_pos.append(pos2)
             
-
+    def IsNextPlayersPiece(index_element, index_row, pos, currentTurn):
+        turn = self.CycleThruMiniTurns(currentTurn)
+        if pos[index_row][index_element] == turn:
+            return True
+        return False
 
     def GetChildren(self, position, currentTurn):
         minimoves = []
@@ -413,7 +395,7 @@ class UpThrustBoard():
             for index_element, element in enumerate(row):
                 if position[index_row][index_element] == self.playerColour[currentTurn]:
                     y2 = self.FindY2(index_row, position)
-                    if self.LegalMove(index_element, index_row, y2, position):
+                    if self.LegalityCheck(index_element, index_row, y2, position):
                         Board2 = deepcopy(position) 
                         Board2 = self.MinimaxMove(index_element, index_row, y2, Board2)   
                         if self.NoLegalMoves(Board2, "any") or self.TwoPiecesInScoringZone(Board2):
@@ -421,7 +403,7 @@ class UpThrustBoard():
                             minimoves.append([Board2, "gameover"])
                         else: 
                             minimoves.append([Board2])                    
-
+        #print(self.MinimovesPrint(minimoves))
         return minimoves
 
     def FindY2(self, InputY1, board):
@@ -484,7 +466,49 @@ class UpThrustBoard():
     def PlayerIsHuman(self):
         if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False: #if current player is AI
             return True
-        return False    
+        return False   
+
+    def MinimovesPrint(self, nested_list):
+        # Open the output file for writing
+        with open("output_board.txt", "a") as file:
+            # Iterate through each secondary list in the nested list
+            for index, sublist in enumerate(nested_list):
+                # Extract the board (assumes each sublist has a single board in the first position)
+                board = sublist[0]
+                
+                # Write the board identifier
+                file.write(f"Board {index + 1}:\n")
+                
+                # Write each row of the board to the file
+                for row in board:
+                    file.write(f"{row}\n")
+                
+                # Add a blank line between boards for readability
+                file.write("\n")
+
+    def PositionsPrint(self):
+        print("called")
+        with open("output.txt", "w") as file:
+            print("opened")
+            # Iterate through each secondary list in the primary list
+            for secondary_list in self.positions:
+
+                # Extract the integer and corresponding board
+                integer = secondary_list[0]
+                board = secondary_list[1]
+                
+                # Write the integer to the file
+
+                file.write(f"Integer: {integer}\n")
+                file.write("Board:\n")
+                
+                # Write each inner list of the board on a new line
+                for row in board:
+                    file.write(f"{row}\n")
+                
+                # Add a blank line between different secondary lists for readability
+                file.write("\n")
+
 
     """ 
         MISC
@@ -548,8 +572,6 @@ class UpThrustBoard():
                 scores.append(self.CountColour(i))
 
         return scores
-
-
 
     def GameStartLogic(self):
         self.GFree = False
@@ -645,5 +667,8 @@ class UpThrustBoard():
                 
                 # Add a blank line between different secondary lists for readability
                 file.write("\n")        
+
+
+
         
       

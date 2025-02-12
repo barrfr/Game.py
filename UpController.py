@@ -4,9 +4,10 @@ import UpModel
 import threading
 import time 
 import random
+from UpCPU import MinimaxMove
 
 class Controller:
-    def __init__(self, model, view):
+    def __init__(self, model, view, cpu):
         """
         Initialization function of the controller
 
@@ -101,33 +102,36 @@ class Controller:
                         self.view.DrawRulesForPlayer('4')
 
                 elif self.setup_screen == True:
+                    """
+                    redraw this entire menu screen -_-
+                    """
                     if pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] < 75: #1 player game
                         self.model.playerCount = 1
                         self.one_player = True
                         self.view.black_bar = True
-                        self.view.PasteImage(self.view.one_img, 0, 0) #highlight the clicked number
-                        self.view.PasteImage(self.view.no_img, -1.3, 327) #highlight "N"
+                        self.view.PasteImage(self.view.one_img, 0, 0, 300/380, 275/337) #highlight the clicked number
+                        self.view.PasteImage(self.view.no_img, 0, 275, 300/382, 275/282) #highlight "N"
                     elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 75 and pygame.mouse.get_pos()[0] < 150: #2 player game
                         self.model.playerCount = 2
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.two_img, -1, 0) #highlight the clicked number
+                        self.view.PasteImage(self.view.two_img, 0, 0, 300/382, 275/330) #highlight the clicked number
                     elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 150 and pygame.mouse.get_pos()[0] < 225: #3 player game
                         self.model.playerCount = 3
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.three_img, -1, 0) #highlight the clicked number
+                        self.view.PasteImage(self.view.three_img, 0, 0, 300/380, 275/335) #highlight the clicked number
                     elif pygame.mouse.get_pos()[1] > 137.5 and pygame.mouse.get_pos()[1] < 275 and pygame.mouse.get_pos()[0] > 225: #4 player game
                         self.model.playerCount = 4
                         self.one_player = False
                         self.view.black_bar = False
-                        self.view.PasteImage(self.view.four_img, 0, 0) #highlight the clicked number
+                        self.view.PasteImage(self.view.four_img, 0, 0, 300/382, 275/331) #highlight the clicked number
                     elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] < 150 and self.one_player == False: #"Y", include AI in the game
                         self.model.AiPlayer = True
-                        self.view.PasteImage(self.view.yes_img, 1.3, 333) #highlight "Y"
+                        self.view.PasteImage(self.view.yes_img, 0, 275, 300/381, 275/272) #highlight "Y"
                     elif pygame.mouse.get_pos()[1] > 412.5 and pygame.mouse.get_pos()[0] > 150: #"N", do not include AI in the game
                         self.model.AiPlayer = False
-                        self.view.PasteImage(self.view.no_img, -1.3, 327) #highlight "N"
+                        self.view.PasteImage(self.view.no_img, 0, 275, 300/382, 275/282) #highlight "N"
 
                 else:
                     if self.model.game["END SCREEN"] == True: #if on the game over screen
@@ -184,7 +188,13 @@ class Controller:
         InputX, InputY1, InputY2 = None, None, None
         try:
             InputX, InputY1, InputY2 = self.ConvertMinimaxToInputs() #calls minimax within the function and then puts the algorithms move into a trio of varialbes
-            self.model.MakeMove(InputX, InputY1, InputY2)
+            print("0")
+            # self.model.Board = UpCPU.MakeMove(self.model.Board, InputX, InputY1, InputY2)
+            self.model.Board = self.MakeMove(self.model.Board, InputX, InputY1, InputY2)
+            print("4")
+            self.CycleThruPlayerTurns()
+            print(self.model.Board)
+            self.model.CycleThruPlayerTurns()
             self.view.DrawBoard(pygame.mouse.get_pos())
             self.view.GreyCircle(InputX, InputY1)
         
@@ -203,19 +213,25 @@ class Controller:
 
 
         Returns:
-            returns InputX, InputY1
+            returns InputX, InputY1, InputY2 if minimax has worked as intended
+            returns nothing in case the minimax runs into an error
+            returns 999, 999, 999 if it si not currently the AI players turn and the prior functions have ran into an error
 
         List of variables:
             InputX (int): the x (row) coordinate of the piece the minimax funtion wants to move
             InputY1 (int): the y coordinate of the piece the minimax funtion wants to move
             InputY2 (int): the y coordinate of the minimax function's chosen move
+            evaluation (int): is the evaluation of the position that Minimax returns
+            pos2 (list): pos2 is the position returned by the minimax function and is unused
+            pos (list): pos is the best move presented by the minimax
         """
         InputX, InputY1, InputY2 = None, None, None
+        self.model.positions = []
         if not self.model.PlayerIsHuman():
             #try:
             self.model.cpu.playercount = len(self.model.cpu.players)
             print("minimax attempted")
-            evaluation, position = self.model.cpu.Minimax(self.model.Board, 3, True, 0, -9999, 9999)
+            evaluation, position = self.model.cpu.Minimax(self.model.Board, 10, True, 0, float('-inf'), float('inf'))
             print("minimax ended")
             for Rindex, row in enumerate(self.model.Board):
                 for Eindex, element in enumerate(self.model.Board[Rindex]):
@@ -225,6 +241,7 @@ class Controller:
                                 
                         elif self.model.Board[Rindex][Eindex] != "":
                             InputY1 = Rindex
+            print(f"X: {InputX} -Y1: {InputY1} -Y2: {InputY2}")
             return InputX, InputY1, InputY2
 
 
@@ -234,6 +251,10 @@ class Controller:
                 
         else:
             return 999, 999, 999
+
+    @MinimaxMove
+    def MakeMove(self, board, InputX, InputY1, InputY2):
+        pass
 
 
 
