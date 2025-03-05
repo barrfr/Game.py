@@ -1,4 +1,18 @@
 from copy import deepcopy
+
+def LegalCheck(func):
+    def wrapper(self, playercount, InputX, InputY1, InputY2, board):
+        islegal = Minimax.LegalMove(InputX, InputY1, InputY2, board, playercount)
+        return islegal
+    return wrapper
+
+def MinimaxMove(func):
+    def wrapper(self, board, InputX, InputY1, InputY2):
+        board = Minimax.MakeMove(board, InputX, InputY1, InputY2)
+        return board
+    return wrapper
+
+
 class Minimax():
     def __init__(self, players):
         """
@@ -71,9 +85,9 @@ class Minimax():
             for child in children:
                 evaluation, z = self.Minimax(child, depth-1, False, self.cycleTurn(currentTurn), alpha, beta)
                 
-                if max_eval != max(max_eval, evaluation):
+                if evaluation > max_eval:
+                    max_eval = evaluation
                     best_move = child
-                    max_eval = max(max_eval, evaluation)
                 
                 alpha = max(alpha, evaluation)
                 if beta <= alpha:
@@ -90,9 +104,9 @@ class Minimax():
             for child in children:
                 evaluation, z = self.Minimax(child, depth-1, self.MaxingPlayer(currentTurn), self.cycleTurn(currentTurn), alpha, beta)
                
-                if min_eval != min(min_eval, evaluation):
+                if evaluation < min_eval:
+                    min_eval = evaluation
                     best_move = child
-                    min_eval = min(min_eval, evaluation)
 
                 beta = min(beta, evaluation)
                 if beta <= alpha:
@@ -104,7 +118,7 @@ class Minimax():
         position_list = []
         for Rindex, row in enumerate(position):
             for Eindex, element in enumerate(row):
-                if (element == self.players[current_turn] or element == self.twoplayers[current_turn]) and self.LegalMove(Eindex, Rindex, self.FindY2(Rindex, position), position):
+                if (element == self.players[current_turn] or element == self.twoplayers[current_turn]) and self.IsLegalMove(self.playercount, Eindex, Rindex, self.FindY2(Rindex, position), position):
                     moved_position = deepcopy(position)
                     moved_position = self.MakeMove(moved_position, Eindex, Rindex, self.FindY2(Rindex, moved_position)) #it should RETURN a NEW BOARD: you must do copy
                     position_list.append(moved_position)
@@ -137,31 +151,27 @@ class Minimax():
         for Rindex, row in enumerate(position):
             for Eindex, element in enumerate(row):
                 if element != "":
-                    if self.LegalMove(Eindex, Rindex, self.FindY2(Rindex, position), position):
+                    if self.IsLegalMove(self.playercount, Eindex, Rindex, self.FindY2(Rindex, position), position):
                         return False
         if not self.TwoPiecesInScoringZone(position):
             return False
 
         return True
 
-    def FurthestForwardsAndMovingOnePlace(char, InputX, InputY1, InputY2, board):
-       #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
-        if (InputY1 - InputY2 == 1) and (self.IsFurthestForwards(char, InputX, InputY1, board)):
-            return True
-        return False
-
-    def IsFurthestForwards(self, char, InputX, InputY1, board, a=0):
-        ''' 
-        scans board for pieces of the same colour behind the current piece, if there are 3, return True
-        '''
+    def FurthestForwardsAndMovingOnePlace(char, InputX, InputY1, InputY2, board, a=0):
         for index, row in enumerate(board):
             for index2 in range(len(row)):
                 if row[index2] == char and index2 != InputX and index > InputY1:
                     a += 1                 
         if a == 3:
-            return True
+            is_piece_the_furthest_forwards = True
         else:
-            return False
+            is_piece_the_furthest_forwards = False
+
+       #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
+        if (InputY1 - InputY2 == 1) and (is_piece_the_furthest_forwards):
+            return True
+        return False
 
     def NumberOfPiecesInLane(InputY1, board):
         counter = 4
@@ -170,8 +180,8 @@ class Minimax():
                 counter -= 1
         return counter
 
-    def MatchingColours(char, InputX, InputY2, board):
-        if InputY2 > 4 or Minimax.playercount == 1: 
+    def MatchingColours(playercount, char, InputX, InputY2, board):
+        if InputY2 > 4 or playercount == 1: 
             for element in board[InputY2]:
                 if element == char:
                     return False
@@ -207,7 +217,7 @@ class Minimax():
         return board
     
     @staticmethod  
-    def LegalMove(InputX, InputY1, InputY2, board):   
+    def LegalMove(InputX, InputY1, InputY2, board, playercount):   
         """
         1. A piece must move exactly as how many space up as there are pieces in the horisontal row from which it departs. (Thus, if there are two pieces in a row, either piece may move up exactly two spaces, after one piece is moved, the other may only move up one space since it has become the solitary piece in the row)
         2. Only one piece may occupy a space, pieces may jump over other pieces, as long as they land on empty spaces
@@ -218,11 +228,13 @@ class Minimax():
             board[InputY1][InputX] != "" and 
             not Minimax.FurthestForwardsAndMovingOnePlace(board[InputY1][InputX], InputX, InputY1, InputY2, board) and 
             Minimax.NumberOfPiecesInLane(InputY1, board) == InputY1 - InputY2 and 
-            Minimax.MatchingColours(board[InputY1][InputX], InputX, InputY2, board)):
-            print("return true")
+            Minimax.MatchingColours(playercount, board[InputY1][InputX], InputX, InputY2, board)):
             return True
-        print("return false")
         return False
+
+    @LegalCheck
+    def IsLegalMove(self, playercount, InputX, InputY1, InputY2, board):
+        pass
 
     def PrintMinimax(self, depth, alpha, beta, turn, maximizing_player, position, score):
         with open("output.txt", "a") as f:  # Append to keep logs from multiple calls
@@ -258,20 +270,3 @@ class Minimax():
             f.write(f"Max Eval: {max_eval}\n")
             f.write(f"Score: {score}\n")
             f.write("-" * 30 + "\n\n")  # Separator for readability
-
-def MinimaxMove(func):
-    def wrapper(self, board, InputX, InputY1, InputY2):
-        print(f"- {board, InputX, InputY1, InputY2} -")
-        print("minimax move returned")
-        board = Minimax.MakeMove(board, InputX, InputY1, InputY2)
-        return board
-    print("wrapper returned")
-    return wrapper
-
-def LegalCheck(func):
-    def wrapper(self, InputX, InputY1, InputY2, board):
-        print("wrapping")
-        islegal = Minimax.LegalMove(InputX, InputY1, InputY2, board)
-        print("islegal obtained")
-        return islegal
-    return wrapper

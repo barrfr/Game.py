@@ -8,13 +8,17 @@ blue = [0, 0, 255]
 green = [0, 255, 0]
 yellow = [255, 255, 0]
 black = [0, 0, 0]
-white = [255, 255, 255]
+white = [230, 230, 230]
 red = [255, 0, 0]
 grey = [255/2, 255/2, 255/2]
+
+
 
 class View():
 
   def __init__(self, model, x=0, y=0):
+    self.scaleheight = 550/2245
+    self.scalewidth = 300/1587
     self.black_bar = False
     self.menu_scale = 0.82
     self.selected_coords = 0, 0
@@ -33,17 +37,9 @@ class View():
     pygame.init()
 
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    self.Black_Square = pygame.image.load('Black_Square.PNG').convert_alpha()
-    self.start_img = pygame.image.load('Upthrust start.PNG').convert_alpha()
-    self.menu_img = pygame.image.load('Upthrust Menu.PNG').convert_alpha()
-    self.one_img = pygame.image.load('One.PNG').convert_alpha()
-    self.two_img = pygame.image.load('Two.PNG').convert_alpha()
-    self.three_img = pygame.image.load('Three.PNG').convert_alpha()
-    self.four_img = pygame.image.load('Four.PNG').convert_alpha()
-    self.yes_img = pygame.image.load('Yes.PNG').convert_alpha()
-    self.no_img = pygame.image.load('No.PNG').convert_alpha()
-    self.rulessetup_img = pygame.image.load('RulesSetup.PNG').convert_alpha()
-
+    self.menu_img = pygame.image.load('MainMenu.PNG').convert_alpha()
+    self.ai_menu_img = pygame.image.load('AiMenu.PNG').convert_alpha()
+    self.rules_menu_img = pygame.image.load('RulesMenu.PNG').convert_alpha()
     self.rules1_img = pygame.image.load('OneRules.PNG').convert_alpha()
     self.rules2_img = pygame.image.load('TwoRules.PNG').convert_alpha()
     self.rules3_img = pygame.image.load('ThreeRules.PNG').convert_alpha()
@@ -68,7 +64,15 @@ class View():
     return black
 
   def DrawSetup(self):
-    Img(0, 0, self.menu_img, 300/381, self.screen, 550/685)
+    Img(0, 0, self.menu_img, self.scalewidth, self.screen, self.scaleheight)
+    pygame.display.update()
+
+  def DrawAiSetup(self):
+    Img(0, 0, self.ai_menu_img, self.scalewidth, self.screen, self.scaleheight) 
+    pygame.display.update()
+
+  def DrawHumanSetup(self):
+    Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight) 
     pygame.display.update()
 
   def PasteImage(self, filename, x, y, scaleX, scaleY):
@@ -76,8 +80,7 @@ class View():
     pygame.display.update()
 
   def DrawRulesSetup(self):
-    pygame.draw.rect(self.screen, [191, 191, 191], (0, 0, self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    Img(0, 0, self.rulessetup_img, 0.65, self.screen)
+    Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight)
     pygame.display.update()
 
   def DrawRulesForPlayer(self, value):
@@ -111,7 +114,6 @@ class View():
   def GreyCircle(self, n, l):
     self.screen.fill(white)
     self.DrawGrid() 
-    #self.BarAtTheTop()
     for i, character in enumerate(self.model.Board[::-1]):
       for j, char in enumerate(character[::-1]):
         y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
@@ -124,16 +126,19 @@ class View():
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     pygame.display.set_caption("Menu")
     self.screen.fill(white)
-    start_button = Img(0, 0, self.start_img, 300/604, self.screen, 550/1079)
+    start_button = Img(0, 0, self.menu_img, self.scalewidth, self.screen, self.scaleheight)
     
     pygame.display.update()
+
   def DrawHighlighted(self, x, y, selected, i, j):
     if selected is None:
       pass
     elif selected[0] == i and selected[1] == j:
-      pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5 - ((self.SCREEN_HEIGHT/11)*self.model.ViewFindY2(i, self.model.Board)+1.5), self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
-      pygame.draw.rect(self.screen, grey, (x-self.SCREEN_WIDTH/8 + 1.5, y-self.SCREEN_HEIGHT/22 +1.5, self.SCREEN_WIDTH/4 - 1, self.SCREEN_HEIGHT/11 - 1), 30)
-      pygame.draw.circle(self.screen, black, (x, y), 20)
+      pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.ViewFindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 20)
+      pygame.draw.circle(self.screen, black, (x, self.SCREEN_HEIGHT/22 + self.model.ViewFindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 12)
+      pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.ViewFindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 10)
+      pygame.draw.circle(self.screen, grey, (x, y), 20)
+      pygame.draw.circle(self.screen, black, (x, y), 12)
       pygame.display.update()
 
   def DrawPieces(self, x, y, character, selected, i, j):
