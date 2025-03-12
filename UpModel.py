@@ -5,11 +5,33 @@ from UpCPU import LegalCheck
 class UpThrustBoard():
     
     def __init__(self, cpu):
+        """
+        Initialisation of the UpThrustBoard class
+
+        Args:
+        cpu = instance of the Minimax class from UPCPU.py instance
+
+        List of Variables:
+        self.cpu (object): Minimax class from UpCPU.py instance
+        self.player_count_for_legal_moves (dictionary): a dictionary that represents how many legal moves each player could have for a given playercount
+        self.AiPlayer (bool): indicates whether the user has turned the CPU player on or off
+        self.col (real): used to store the coloumn that the users click was made in
+        self.row (real): used to store the row that the users click was made in
+        self.why_two (real): used to store the second Y value of a click
+        self.selected_piece (string): saves the type of piece that was clicked on
+        self.selected_coor (coordinate): saves the coordinate of a click
+        self.Clicked (bool): stores the boolean value of a click
+        self.playerCount (int):stores active player count
+        self.game (dictionary): stores relevant game information (i.e. gameover, current turn)
+        self.playerColour (dictionary): stores the relation between a colour and the turn number it can move on
+        self.AiPlayers (dictionary): stores the relation between the player number and whether they are a CPU opponent using a boolean value
+        self.ColourAiPlayers (dictionary): stores the relation between the player colours and whether they are a CPU opponent using a boolean value
+        self.Board (list): stores the primary board used in the representation of the UI
+        self.final_score (list): a list that has the score of each row of the board according to the rulebook
+        """
+
         self.cpu = cpu
-        self.positions = []
         self.player_count_for_legal_moves = {1:16, 2:8, 3:8, 4:4}
-        self.GFree = False
-        self.TFree = False
         self.free_colours = []
         self.AiPlayer = False
         self.col = 0
@@ -17,27 +39,10 @@ class UpThrustBoard():
         self.why_two = 0
         self.selected_piece = None
         self.selected_coor = None
-        self.minimax_pos = []
-        self.minimax_turn = 1
-        self.ListOfMoves = [] #2D list that holds all the moves minimax has made do they can be called upon later
-        self.maxScore = 0
-        self.minScore = 0
         self.Clicked = False
         self.click_1_x = 0
         self.click_1_y = 0
-        self.j = 0
         self.playerCount = 4
-        self.moves = [[0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0], 
-                      [0, 0, 0]]
-        self.minimoves = []
         self.game = {
             'GAMEOVER' : False,
             'END SCREEN' : False,
@@ -50,13 +55,8 @@ class UpThrustBoard():
             3: 'G',
             0: 'Y'
             }
-        
-        #row = ['' for i in range(4)]
-        #board = [row for i in range(7)]
-        #board += [lst[:i] + lst[i:] for i in range(4)]
         self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
         self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
-        """
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
@@ -68,19 +68,6 @@ class UpThrustBoard():
                       ["Y", "G", "R", "B"],
                       ["G", "R", "B", "Y"],
                       ["R", "B", "Y", "G"]]
-        """
-        self.Board = [["", "", "", ""], 
-                      ["", "", "", ""], 
-                      ["", "", "", ""],
-                      ["", "Y", "", "R"],
-                      ["B", "", "R", ""],
-                      ["", "", "", "B"], 
-                      ["", "G", "Y", ""],
-                      ["R", "", "G", ""],
-                      ["Y", "", "", ""],
-                      ["G", "R", "B", "Y"],
-                      ["", "B", "", "G"]]
-
         
         self.final_score = [60,
                             40,
@@ -93,23 +80,12 @@ class UpThrustBoard():
                             0,
                             0,
                             0]
-        self.k = 2
-        self.BoardScore = [120*self.k**2, 
-                      81*self.k**2,
-                      64*self.k**2, 
-                      49*self.k**2,
-                      36*self.k**2, 
-                      25*self.k**2,
-                      16*self.k**2, 
-                      9*self.k**2, 
-                      4*self.k**2,
-                      self.k**2,
-                      0]
 
     """ 
         TURN MANAGEMENT
     """
 
+    #Goes onto the next turn by using (turn+1)%playercount
     def CycleThruPlayerTurns(self):
         if self.playerCount == 4:
             self.game['turn'] = (self.game['turn']+1)%4
@@ -119,23 +95,12 @@ class UpThrustBoard():
         
         if self.playerCount == 2:
             self.game['turn'] = (self.game['turn']+1)%2
-            print(f"game turn {self.game['turn']}")
 
         if self.playerCount == 1:
             self.game['turn'] = 1
 
-    def CycleThruMiniTurns(self, turn):
-        '''
-        This function cycles the player turn *within* the minimax function so that it knows which player's pieces it should simulate moving
-        '''
-        return (turn+1)%self.playerCount
-
-    def SkipPlayerTurn(self):
-        if self.NoLegalMoves(self.Board, self.playerColour[self.game['turn']]):
-            self.CycleThruPlayerTurns()
-
     """ 
-        MOVE MANAGEMENT 
+        MOVE & LEGALITY MANAGEMENT 
     """
 
     @MinimaxMove
@@ -144,52 +109,16 @@ class UpThrustBoard():
     
     @LegalCheck
     def LegalityCheck(self, playerCount, InputX, InputY1, InputY2, board):
-        pass
+        pass   
 
-    def RetractMove(self, InputX, InputY1, InputY2):
-        self.Board[self.moves[9][0]][self.moves[9][1]] = self.Board[self.moves[9][2]][self.moves[9][1]] 
-        self.Board[self.moves[9][2]][self.moves[9][1]] = ""    
-
-    """ 
-        LEGALITY MANAGEMENT
-    """
-    
-    def FurthestForwardsAndMovingOnePlace(self, char, InputX, InputY1, InputY2, board):
-       #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
-        if (InputY1 - InputY2 == 1) and (self.IsFurthestForwards(char, InputX, InputY1, board)):
-
+    def PlayerIsHuman(self):
+        #if current player is AI
+        if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False:
             return True
-        return False
-
-    def IsFurthestForwards(self, char, InputX, InputY1, board, a=0):
-        ''' 
-        scans board for pieces of the same colour behind the current piece, if there are 3, return True
-        '''
-        for index, row in enumerate(board):
-            for index2 in range(len(row)):
-                if row[index2] == char and index2 != InputX and index > InputY1:
-                    a += 1                 
-        if a == 3:
-            return True
-        else:
-            return False
-
-    def NumberOfPiecesInLane(self, InputY1, board):
-        counter = 4
-        for char in board[InputY1]:
-            if char == "":
-                counter -= 1
-        return counter
-
-    def MatchingColours(self, char, InputX, InputY2, board):
-        if InputY2 > 4 or self.playerCount == 1: 
-            for element in board[InputY2]:
-                if element == char:
-                    return False
-                
-        return True
+        return False 
 
     def IsPlayersPiece(self, InputX, InputY1):
+        # checks if a piece at the given input is the same colour as the current player turn
         if self.playerColour[self.game['turn']] == self.Board[InputY1][InputX]:
             return True
         elif (self.playerCount == 3) and self.Board[InputY1][InputX] == 'G':
@@ -203,10 +132,11 @@ class UpThrustBoard():
     
 
     def NoLegalMoves(self, board, piece):
-        ''' 
-        checks entire board for if there are any legal moves remaining, for each piece that cant move, deduct from 16, if it never reaches 0, that measn that theres n available move, return false, game over
-        '''
+        #checks entire board for if there are any legal moves remaining, for each piece that cant move, deduct from 16, if it never reaches 0, that measn that theres n available move, return false, game over
+
         number_of_legal_moves = 16
+
+        #function can check the entire board for pieces of all colours if piece is "any"
         if piece == "any":
             for index, line in enumerate(board):
                 for locus, char in enumerate(line):
@@ -215,7 +145,8 @@ class UpThrustBoard():
                             pass
                         else:
                             number_of_legal_moves -= 1
-            
+
+        #if piece isnt "any", it will check for a specific piece  
         else:
             number_of_legal_moves = self.player_count_for_legal_moves[self.playerCount]
             for index, line in enumerate(board):
@@ -228,29 +159,33 @@ class UpThrustBoard():
                     
         if number_of_legal_moves == 0:
             return True
-        else:
-            return False
-
-    def TwoPiecesInScoringZone(self, board):
-        ''' 
-        a rule where if there are two pieces in the non-scoring zone, return True, game over
-        '''
-        pieces = 0
-        for number, line in enumerate(board):
-            if number > 4:
-                for char in line:
-                    if char != "":
-                        pieces += 1
-        if pieces < 3:
-            return True
-        else:
-            return False
+        return False
 
     """ 
         CLICKING MANAGEMENT
     """
 
     def Clicking(self, board, posx, posy):
+        """
+        an initial if statement checks if a click has already been made (if this were true self.selected_piece != None).
+        if there is a piece at the point of the click, then save the values of the click to 'self.' variables so that they can be accessed by UpView and other functions.
+        if there is no piece simply ignore the click
+
+        if there is a piece already selected,
+        then check to see if the click was made in the same place as the selected piece [if row == self.row and col == self.col:]
+        and if so, reset the necesary variables, effectively deselecting the piece
+        if not, then check the legality of moving the piece at the original click, to the most recent click
+        following this, make the move, cycle the player turn, and change the necesary variables
+
+        Args:
+        board (list): current board position
+        posx (decimal): the x coordinate of the click designated by pygame
+        posy (decimal): the y coordinate of the click designated by pygame
+
+        List of variables:
+        row (int): the board index of the x coordinate argument
+        col (int): the board index of the y coordinate argument
+        """
         row = posy // (550 // 11)
         col = posx // (300 // 4)
         if self.selected_piece == None:
@@ -279,67 +214,31 @@ class UpThrustBoard():
                 self.selected_piece = None
                 
     def PieceIsPlayers(self, row, col):
+        """
+        checks whether the piece at the index presented by the arguments, is of the same player as the current turn. Each playercount uses a different checking method
+        4 players: (is the y index of the piece the same as the second Y index of the original click made) and (is the x index of the piece the same as the second Y index of the original click made) and is the piece at the original index the same as the current players turn
+        3 players: in addition to the 4 player rules, the piece can also be 'G' as well as the current players piece
+        2 players: in addition to the 4 player rules, the piece can also be the second colour that a given player commands (red also commands blue, and yellow also commands green)
+        there is no need to check this for a single player game because all pieces are the player's
+        
+        Args:
+        col (int): x board index of the piece
+        row (int): y board index of the piece
+        """
         if self.playerCount == 4:
             return (row == self.why_two and col == self.col and (self.Board[self.row][self.col] == self.playerColour[self.game['turn']]))
         if self.playerCount == 3:
             return (row == self.why_two and col == self.col and (self.Board[self.row][self.col] == self.playerColour[self.game['turn']] or self.Board[self.row][self.col] == 'G'))
         if self.playerCount == 2:
-            print(f"self.game['turn'] {self.game['turn']}")
-            print(f"self.playerColour[self.game['turn']] {self.playerColour[self.game['turn']]}")
             return (row == self.why_two and col == self.col and (self.Board[self.row][self.col] == self.playerColour[self.game['turn']] or self.Board[self.row][self.col] == self.cpu.twoplayers[self.game['turn']]))
-        print("1playergame")
         return True
-            #self.twoplayers = ["G", "B"]
-
-        
-
-    def ClickOne(self, pos):
-        ''' 
-        splits board up into tiles and makes the click variables equal to whichever tile the click occured
-        ''' 
-        self.Clicked = True
-        self.click_1_x = pos[0] // (300 // 4)
-        self.click_1_y = pos[1] // (550 // 11)
-
-    def IsClickTwoEqualToClickOne(self, pos):
-        ''' 
-        if the second click is equal to the first, return True and deselect the piece like on chess.com or something
-        ''' 
-        Clicked = False
-        i = pos[0] // (300 // 4)
-        self.j = pos[1] // (550 // 11)
-        if i == self.click_1_x and self.j == self.click_1_y:
-            return True
-
-        return False
-
-    """ 
-        MINIMAX FUNCTIONS
-    """
-
-    def ViewFindY2(self, InputY1, board):
-        number_of_pieces_in_row = 0
-        
-        for char in board[InputY1]:
-            if char != "":
-                number_of_pieces_in_row += 1
-        print(f"no of piecesin row {number_of_pieces_in_row}")
-        print(f"inputY1 {InputY1}")
-        return InputY1-number_of_pieces_in_row
- 
-    def PlayerIsHuman(self):
-        if self.ColourAiPlayers[self.playerColour[self.game['turn']]] == False: #if current player is AI
-            return True
-        return False 
-          
+     
     """ 
         MISC
     """ 
 
-    def GetBoard(self):
-        return self.Board
-
     def ResetBoard(self):
+        #used by the controller to reset the board to its iriginal starting position
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
@@ -353,6 +252,8 @@ class UpThrustBoard():
                       ["R", "B", "Y", "G"]]
 
     def CountColour(self, colour):
+        #checks the board for certain coloured pieces given on the 'colour' argument
+        # it returns these in a list that can be digested by the countscores function
         score = 0
         if colour == 'T1':
             for loc, i in enumerate(self.Board):
@@ -382,6 +283,7 @@ class UpThrustBoard():
 
         return [score, colour]
 
+    #creates a list of scores for each player in the game, which is then used by UpView.py
     def CountScores(self):
         scores = []
         for i in self.ColourAiPlayers:
@@ -395,20 +297,18 @@ class UpThrustBoard():
 
         return scores
 
+    #used by the controller to start a game 
+    #important as different games have different variables (i.e. playercount or AI player)
+    #when attempting to play multiple games consecutively, it is important as it wipes variables back to their default state
     def GameStartLogic(self):
-        self.GFree = False
-        self.TFree = False
         self.col = 0
         self.row = 0
         self.why_two = 0
         self.selected_piece = None
         self.selected_coor = None
-        self.minimax_pos = []
         self.Clicked = False
         self.click_1_x = 0
         self.click_1_y = 0
-        self.j = 0
-        self.minimoves = []
         self.game = {
             'GAMEOVER' : False,
             'END SCREEN' : False,
@@ -431,12 +331,9 @@ class UpThrustBoard():
         self.board += [lst[:i] + lst[i:] for i in range(4)]
 
         if self.playerCount == 4:
-            print("4 plyaers")
             self.cpu.players = ["Y", "R", "B", "G"]
             self.cpu.twoplayers = [None, None, None, None] 
-            self.free_colours = {}
             if self.AiPlayer == True:
-                print("AI PLAYER TRUE")
                 self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
                 self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
 
@@ -447,7 +344,6 @@ class UpThrustBoard():
         if self.playerCount == 3:
             self.cpu.players = ["Y", "R", "B"]
             self.cpu.twoplayers = ["G", None, None]         
-            self.GFree = True
             if self.AiPlayer == True:
                 self.AiPlayers = {1:False, 2:False, 0:True}
                 self.ColourAiPlayers = {'R':False, 'B':False, 'Y':True}
@@ -460,7 +356,6 @@ class UpThrustBoard():
             self.cpu.players = ["Y", "R"]
             self.cpu.twoplayers = ["G", "B"]
             self.cpu.playercount = 2
-            self.TFree = True
             if self.AiPlayer == True:
                 self.AiPlayers = {1:False, 0:True}
                 self.ColourAiPlayers = {'R':False, 'Y':True}
@@ -470,24 +365,5 @@ class UpThrustBoard():
                 self.ColourAiPlayers = {'R':False, 'Y':False}
 
         if self.playerCount == 1:
-            self.free_colours = {1:'B', 1:'G', 1:'Y'}
             self.AiPlayers = {1:False}
-            self.ColourAiPlayers = {'R':False}
-            
-    def PositionPrint(self, primary_list):
-        with open("output.txt", "w") as file:
-            for secondary_list in primary_list:
-                # Extract the integer and corresponding board
-                integer = secondary_list[0]
-                board = secondary_list[1]
-                
-                # Write the integer to the file
-                file.write(f"Integer: {integer}\n")
-                file.write("Board:\n")
-                
-                # Write each inner list of the board on a new line
-                for row in board:
-                    file.write(f"{row}\n")
-                
-                # Add a blank line between different secondary lists for readability
-                file.write("\n")        
+            self.ColourAiPlayers = {'R':False}    

@@ -9,15 +9,16 @@ from UpCPU import MinimaxMove
 class Controller:
     def __init__(self, model, view, cpu):
         """
-        Initialization function of the controller
+        Initializer of the controller and pygame
 
-        Args:
-            model: instantiates a model object that the controller will use for the entirety fo the program
-            view: instantiates a view object that the controller will use for the entirety fo the program
+        Args (all recieved from UpMain.py):
+            model: an instance of the UpThrustBoard class from UpModel.py 
+            view: an instance of the View class from UpView.py
+            cpu: an instance of the Minimax class from UpCPU.py
 
         List of variables:
-            rulessetup (bool): used to see if the current screen is the rules setup screen
-            threads (int): variable to initialise CheckAI func within a thread
+            self.rules_setup (bool): used to see if the current screen is the rules setup screen
+            self.threads (int): variable to initialise CheckAI func within a thread
             self.check_ai (bool): used for the running loop of CheckAI function
             self.one_player (bool): variable that tells the program if the user requests a single player game
             self.model (class): instantiates an instance of UpModel.py
@@ -25,9 +26,10 @@ class Controller:
             self.running (bool): used for the event manager loop
             self.menu_screen (bool): tells the program if the user is currently on the menu screen
             self.rules_screen (bool): tells the program if the user is currently on the rules screen
-            self.setup_screen (bool): tells the program if the user is currently on the game setup screen
             self.t1 (class): readies the t1 thread for initialisation 
             self.playercountdepth (dictionary): different playercounts take longer for minimax to process, this is used so that the optimal depth is used for each playercount according to processing time
+            self.human_setup_screen (bool): checks if current screen is the human playercount menu
+            self.ai_setup_screen (bool): checks if current screen is the CPU opponent activation menu
         """
         self.rules_setup = False 
         self.threads = 0 
@@ -53,7 +55,6 @@ class Controller:
         """
         primary function of the controller that uses the 'for event in pygame.event.get()' in order to constantly check for user input
         once a user input is detected, a lengthened if-elif statement is conducted to account for all inputs that invoke a response from the program at a given time
-
         """
 
         for event in pygame.event.get(): #constantly checks for events for pygame to use
@@ -62,50 +63,49 @@ class Controller:
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    print(f"main, human, ai, rules {self.menu_screen, self.human_setup_screen, self.ai_setup_screen, self.rules_setup == True}")
+                if event.key == pygame.K_ESCAPE: #if esc pressed
+                    # adjust variables accordingly and redraw the corresponding screen
                     if self.rules_setup == True:
                         self.rules_screen = False
                         self.menu_screen = True
                         self.rules_setup = False
-                        self.view.DrawMenu() #sets the appropriate variables to true and false then redraws the main menu
+                        self.view.DrawMenu() 
                     elif self.human_setup_screen == True:
                         self.human_setup_screen = False
                         self.menu_screen = True
-                        self.view.DrawMenu() #sets the appropriate variables to true and false then redraws the main menu
+                        self.view.DrawMenu() 
                     elif self.ai_setup_screen == True:
                         self.ai_setup_screen = False
                         self.human_setup_screen = True
-                        self.view.DrawHumanSetup()
+                        self.view.DrawHumanSetup() 
 
             if pygame.mouse.get_pressed()[0] == True: #if mouse 1 is pressed
+                #if (on certain screen) and (click is in the X coordinates of a buttton)
+                #main menu
                 if self.menu_screen and pygame.mouse.get_pos()[0] > (1/10)*self.view.SCREEN_WIDTH and pygame.mouse.get_pos()[0] < self.view.SCREEN_WIDTH - (1/10)*self.view.SCREEN_WIDTH:
-                    print("click Menu bounds")
-                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #square 2
-                        print("click Menu 2")
+                    #if click is in the y coordinate of a button
+                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #start button
                         self.human_setup_screen = True
                         self.menu_screen = False 
                         self.view.DrawHumanSetup()
 
-                    elif pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #square 3
-                        print("click Menu 3")
+                    elif pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #rules button
                         self.menu_screen = False
                         self.rules_setup = True
                         self.view.DrawRulesSetup()
 
-                    elif pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #square 4
-                        print("click Menu 4")
+                    elif pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #quit button
                         self.running = False
 
+                #Player count decider menu
                 elif self.human_setup_screen == True and pygame.mouse.get_pos()[0] > (1/10)*self.view.SCREEN_WIDTH and pygame.mouse.get_pos()[0] < self.view.SCREEN_WIDTH - (1/10)*self.view.SCREEN_WIDTH:
-                    print("human setup true")
                     '''
                     7/99 | (7/99) + (11/54) = 163/594
                     (163/594) + (1/66) = 86/297 | (86/297) + (11/54) = 293/594
                     (293/594) + (1/66) = 151/297 | (151/297) + (11/54) = 47/66
                     (47/66) + (1/66) = 8/11 | (8/11) + (11/54) = 553/594
                     '''
-                    if pygame.mouse.get_pos()[1] > (7/99)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (163/594)*self.view.SCREEN_HEIGHT: #square 1
+                    if pygame.mouse.get_pos()[1] > (7/99)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (163/594)*self.view.SCREEN_HEIGHT: #1 player button
                         self.human_setup_screen = False
                         self.one_player = True
                         self.model.playerCount = 1
@@ -116,21 +116,21 @@ class Controller:
                         if self.threads == 0:
                             self.t1.start() #initialises the t1 thread
                             self.threads = 1
-                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #square 2
+                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #2 player button
                         self.human_setup_screen = False
                         self.ai_setup_screen = True 
                         self.one_player = False
                         self.model.playerCount = 2
                         self.view.black_bar = False                    
                         self.view.DrawAiSetup()
-                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #square 3
+                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #3 player button
                         self.human_setup_screen = False
                         self.ai_setup_screen = True 
                         self.one_player = False
                         self.model.playerCount = 3
                         self.view.black_bar = False                    
                         self.view.DrawAiSetup()
-                    if pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #square 4
+                    if pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #4 player button
                         self.human_setup_screen = False
                         self.ai_setup_screen = True 
                         self.one_player = False
@@ -138,18 +138,17 @@ class Controller:
                         self.view.black_bar = False                    
                         self.view.DrawAiSetup()
 
+                #CPU opponent activation menu
                 elif self.ai_setup_screen == True and pygame.mouse.get_pos()[0] > (1/10)*self.view.SCREEN_WIDTH and pygame.mouse.get_pos()[0] < self.view.SCREEN_WIDTH - (1/10)*self.view.SCREEN_WIDTH:
-                    print("ai setup true")
-                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #square 2
+                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #"yes" button
                         self.ai_setup_screen = False
                         self.model.AiPlayer = True
                         self.model.GameStartLogic()
-                        print("setted")
                         self.view.DrawBoard(pygame.mouse.get_pos())
                         if self.threads == 0:
                             self.t1.start() #initialises the t1 thread
                             self.threads = 1
-                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #square 3
+                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #"no" button
                         self.ai_setup_screen = False
                         self.model.AiPlayer = False
                         self.model.GameStartLogic()
@@ -158,18 +157,18 @@ class Controller:
                             self.t1.start() #initialises the t1 thread
                             self.threads = 1
 
-
+                #rule playercount chooser menu
                 elif self.rules_setup == True and pygame.mouse.get_pos()[0] > (1/10)*self.view.SCREEN_WIDTH and pygame.mouse.get_pos()[0] < self.view.SCREEN_WIDTH - (1/10)*self.view.SCREEN_WIDTH:
-                    print("rulessetup True")
-                    if pygame.mouse.get_pos()[1] > (7/99)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (163/594)*self.view.SCREEN_HEIGHT: #square 1
+                    if pygame.mouse.get_pos()[1] > (7/99)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (163/594)*self.view.SCREEN_HEIGHT: #1 player
                         self.view.DrawRulesForPlayer('1') 
-                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #square 2
+                    if pygame.mouse.get_pos()[1] > (86/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (293/594)*self.view.SCREEN_HEIGHT: #2 players
                         self.view.DrawRulesForPlayer('2') 
-                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #square 3
+                    if pygame.mouse.get_pos()[1] > (151/297)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (47/66)*self.view.SCREEN_HEIGHT: #3 players
                         self.view.DrawRulesForPlayer('3')
-                    if pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #square 4
+                    if pygame.mouse.get_pos()[1] > (8/11)*self.view.SCREEN_HEIGHT and pygame.mouse.get_pos()[1] < (553/594)*self.view.SCREEN_HEIGHT: #4 players
                         self.view.DrawRulesForPlayer('4')
-
+                
+                #endgame screen
                 else:
                     if self.model.game["END SCREEN"] == True: #if on the game over screen
                         self.view.DrawMenu() #return to the menu
@@ -190,7 +189,7 @@ class Controller:
         """
         while self.check_ai:
             time.sleep(0.001) 
-            if (self.model.NoLegalMoves(self.model.Board, "any")) or (self.model.TwoPiecesInScoringZone(self.model.Board)):
+            if (self.model.NoLegalMoves(self.model.Board, "any")) or (self.model.cpu.TwoPiecesInScoringZone(self.model.Board)):
                 time.sleep(1)
                 self.model.game['GAMEOVER'] = True
                 self.view.DrawGameOver() #if the game is over
@@ -213,8 +212,7 @@ class Controller:
 
     def RunAI(self):
         """
-        Function that attempts to call minimax
-        if minimax is uncallable, skip the current turn
+        Function that calls minimax, and updates the board UI and board logic
 
         List of variables:
         InputX (int): the x (row) coordinate of the piece the minimax funtion wants to move
@@ -223,35 +221,22 @@ class Controller:
 
         """
         InputX, InputY1, InputY2 = None, None, None
-        #try:
         InputX, InputY1, InputY2 = self.ConvertMinimaxToInputs() #calls minimax within the function and then puts the algorithms move into a trio of varialbes
-        print("0")
-        # self.model.Board = UpCPU.MakeMove(self.model.Board, InputX, InputY1, InputY2)
         self.model.Board = self.MakeMove(self.model.Board, InputX, InputY1, InputY2)
-        print("4")
         self.model.CycleThruPlayerTurns()
-        print(self.model.Board)
         self.view.DrawBoard(pygame.mouse.get_pos())
         self.view.GreyCircle(InputX, InputY1)
-        
-        #except:
-            # if InputX != 999:
-            #     self.model.CycleThruPlayerTurns()
-            #     self.view.DrawBoard(pygame.mouse.get_pos())
-            # else:
-            #     self.view.DrawBoard(pygame.mouse.get_pos())
 
     def ConvertMinimaxToInputs(self):
         """
         Function used to actually call Minimax
-        It mainly takes the minimax return values and turns them into values that can be used by the self.model.MakeMove() function 
+        It mainly takes the minimax return values and turns them into values that can be used by the self.MakeMove() function 
         this allows the AI player to make their move on the actual game board
 
 
         Returns:
-            returns InputX, InputY1, InputY2 if minimax has worked as intended
-            returns nothing in case the minimax runs into an error
-            returns 999, 999, 999 if it si not currently the AI players turn and the prior functions have ran into an error
+            InputX, InputY1, InputY2 if minimax has worked as intended
+            999,999,999 in case an error has occured 
 
         List of variables:
             InputX (int): the x (row) coordinate of the piece the minimax funtion wants to move
@@ -264,11 +249,8 @@ class Controller:
         InputX, InputY1, InputY2 = None, None, None
         self.model.positions = []
         if not self.model.PlayerIsHuman():
-            #try:
             self.model.cpu.playercount = len(self.model.cpu.players)
-            print(f"minimax attempted {self.playercountdepth[self.model.playerCount]}")
             evaluation, position = self.model.cpu.Minimax(self.model.Board, self.playercountdepth[self.model.playerCount], True, 0, float('-inf'), float('inf'))
-            print("minimax ended")
             for Rindex, row in enumerate(self.model.Board):
                 for Eindex, element in enumerate(self.model.Board[Rindex]):
                     if self.model.Board[Rindex][Eindex] != position[Rindex][Eindex]:
@@ -277,21 +259,12 @@ class Controller:
                                 
                         elif self.model.Board[Rindex][Eindex] != "":
                             InputY1 = Rindex
-            print(f"X: {InputX} -Y1: {InputY1} -Y2: {InputY2}")
             return InputX, InputY1, InputY2
 
-
-            #except:
-                #print("except")
-                #return 
-                
         else:
             return 999, 999, 999
 
     @MinimaxMove
     def MakeMove(self, board, InputX, InputY1, InputY2):
+        #allows the controller to use the MinimaxMove function within UpCPU.py
         pass
-
-
-
-

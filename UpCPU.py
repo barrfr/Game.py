@@ -16,7 +16,7 @@ def MinimaxMove(func):
 class Minimax():
     def __init__(self, players):
         """
-        Initialization function of the Minimax Class
+        Initializer of the Minimax Class
 
         Args:
             players: list containing the players for a given game in the form ["Y", "R", "B", "G"]
@@ -28,12 +28,6 @@ class Minimax():
             self.players (list): self.players = players
             self.playercount (int): uses the player list to calculate the playercount
         """
-        with open("output.txt", "w") as f:
-            f.write("")
-        with open("outputChildren.txt", "w") as g:
-            g.write("")
-        with open("outputReturns.txt", "w") as h:
-            h.write("")
         self.k = 2
         self.BoardScore = [120*self.k**2, 
                       81*self.k**2,
@@ -48,17 +42,7 @@ class Minimax():
                       0]
         self.twoplayers = ["G", "B"]
         self.players = players #["Y", "R", "B", "G"]
-        print(f"players {self.players}")
-        print(f"len players {len(players)}")
         self.playercount = len(players)
-
-    #@property
-    #def playercount(self):
-    #    return self.playercount
-    
-    #@playercount.setter
-    #def playercount(self, count):
-    #    self.playercount = count
 
     def Minimax(self, position, depth, maximisingPlayer, currentTurn, alpha, beta):
         """
@@ -66,22 +50,35 @@ class Minimax():
 
         Args:
             position (2Dlist): the current board state
-            depth (int): represents how deep the minimax is 
-            maximisingPlayer (bool): True or False for if the current player's
+            depth (int): represents how deep the minimax function is 
+            maximisingPlayer (bool): True or False for if the current player is to be considered the maximising or minimising player
+            currentTurn (int): number from 0-3 that tells the function what turn it is so it knows what pieces it can move when simulating a game
+            alpha (real): value used for alpha beta pruning
+            beta (real): value used for alpha beta pruning
 
         List of variables:
-
-
+            best_move (list): stores the optimally scoring move that the minimax function simulates
+            max_eval (int): used to store the evaluation of the highest scoring move
+            children (list): stores the child positions of any given board
+            evaluation (int): represents the evaluation value of a nested minimax function
+            z (list): unused variable that stores the position of the evaluation
+            min_eval (int) used to store the evaluation of the lowest scoring move
         """
-        #self.PrintMinimax(depth, alpha, beta, currentTurn, maximisingPlayer, position, self.EvaluatePos(position))
+
+        #game over or depth 0 check
         if depth == 0 or self.GameOver(position):
             return self.EvaluatePos(position), position
+
         if maximisingPlayer:
             best_move = None
             max_eval = float('-inf')
             children =  self.ChildPositions(position, currentTurn)
-            if not children:
+
+            #if there are no child positions
+            if not children: 
                 return self.EvaluatePos(position), position
+
+            #iteration function for each child
             for child in children:
                 evaluation, z = self.Minimax(child, depth-1, False, self.cycleTurn(currentTurn), alpha, beta)
                 
@@ -89,18 +86,23 @@ class Minimax():
                     max_eval = evaluation
                     best_move = child
                 
+                #prune unnecesary branches
                 alpha = max(alpha, evaluation)
                 if beta <= alpha:
                     break
-            #self.PrintReturning(depth, alpha, beta, max_eval, evaluation)
             return max_eval, best_move
 
+        #if not maximising player
         else:
             best_move = None
             min_eval = float('inf')
             children =  self.ChildPositions(position, currentTurn)
+
+            #if there are no child positions
             if not children:
                 return self.EvaluatePos(position), position
+
+            #iteration function for each child
             for child in children:
                 evaluation, z = self.Minimax(child, depth-1, self.MaxingPlayer(currentTurn), self.cycleTurn(currentTurn), alpha, beta)
                
@@ -108,36 +110,48 @@ class Minimax():
                     min_eval = evaluation
                     best_move = child
 
+                #prune unnecesary branches
                 beta = min(beta, evaluation)
                 if beta <= alpha:
                     break
-            #self.PrintReturning(depth, alpha, beta, min_eval, evaluation)
             return min_eval, best_move
             
+    #finds the child positions of a board in the minimax function
     def ChildPositions(self, position, current_turn):
         position_list = []
         for Rindex, row in enumerate(position):
             for Eindex, element in enumerate(row):
+               #if (  current piece is the player's piece  ) and (the pieces available move is legal):
                 if (element == self.players[current_turn] or element == self.twoplayers[current_turn]) and self.IsLegalMove(self.playercount, Eindex, Rindex, self.FindY2(Rindex, position), position):
+                    #make a copy of the board to simulate a move on
                     moved_position = deepcopy(position)
                     moved_position = self.MakeMove(moved_position, Eindex, Rindex, self.FindY2(Rindex, moved_position)) #it should RETURN a NEW BOARD: you must do copy
+                    #add move to the list of all the child positions
                     position_list.append(moved_position)
 
-        #self.PrintChildren(position_list)
         return position_list
 
+    #evaluates a position
     def EvaluatePos(self, position):
         score = 0
         for Rindex, row in enumerate(position):
             for element in row:
+
+                #deducts green pieces from the total to discourage developing green pieces
                 if self.playercount == 3 and element == "G":
                     score -= (self.BoardScore[Rindex])*3
+
+                #adds Y or G pieces in 2 player games
                 elif element == "Y" or (self.playercount == 2 and element == "G"):
                     score += self.BoardScore[Rindex]
+                
+                #if any other piece, deduct score
                 elif element in self.players:
                     score -= self.BoardScore[Rindex]
+
         return score
 
+    #deduces if the current turn is a maximiser's turn or a minimiser's
     def MaxingPlayer(self, currentTurn):
         next_turn = self.cycleTurn(currentTurn)
         if self.players[next_turn] == "Y":
@@ -147,39 +161,48 @@ class Minimax():
     def cycleTurn(self, currentTurn):
         return (currentTurn+1)%self.playercount
 
+    #checks whether the position argument is a completed game
     def GameOver(self, position):
-        for Rindex, row in enumerate(position):
-            for Eindex, element in enumerate(row):
-                if element != "":
-                    if self.IsLegalMove(self.playercount, Eindex, Rindex, self.FindY2(Rindex, position), position):
-                        return False
         if not self.TwoPiecesInScoringZone(position):
             return False
+            
+        for Rindex, row in enumerate(position):
+            for Eindex, element in enumerate(row):
+
+                #if element is a piece and can make a move
+                if element != "" and self.IsLegalMove(self.playercount, Eindex, Rindex, self.FindY2(Rindex, position), position):
+                    return False
 
         return True
+
 
     def FurthestForwardsAndMovingOnePlace(char, InputX, InputY1, InputY2, board, a=0):
         for index, row in enumerate(board):
             for index2 in range(len(row)):
+                #if (the piece is the same colour as char) and (it is not in the same coloumn as char) and (its further back than char)
                 if row[index2] == char and index2 != InputX and index > InputY1:
-                    a += 1                 
+                    a += 1   
+
         if a == 3:
             is_piece_the_furthest_forwards = True
         else:
-            is_piece_the_furthest_forwards = False
+           return False
 
-       #if (    moves one tile    ) and (     is the furthest piece forwads of its colour     )      
+       #if (    moves one tile    ) and (is the furthest piece forwads of its colour)      
         if (InputY1 - InputY2 == 1) and (is_piece_the_furthest_forwards):
             return True
         return False
 
+    #returns an int of how many pieces are in the given Y value of a board
     def NumberOfPiecesInLane(InputY1, board):
         counter = 4
+
         for char in board[InputY1]:
             if char == "":
                 counter -= 1
         return counter
 
+    #checks if there are matching colours in the same row of the board in the non scoring rows
     def MatchingColours(playercount, char, InputX, InputY2, board):
         if InputY2 > 4 or playercount == 1: 
             for element in board[InputY2]:
@@ -189,9 +212,7 @@ class Minimax():
         return True    
 
     def TwoPiecesInScoringZone(self, board):
-        ''' 
-        a rule where if there are two pieces in the non-scoring zone, return True, game over
-        '''
+        #a rule where if there are two pieces in the non-scoring zone, return True, game over
         pieces = 0
         for number, line in enumerate(board):
             if number > 4:
@@ -200,16 +221,18 @@ class Minimax():
                         pieces += 1
         if pieces < 3:
             return True
-        else:
-            return False
+        return False
 
+    #finds the Y position of a move 
     def FindY2(self, InputY1, board):
-        number_of_pieces_in_row = 0
-        for char in board[InputY1]:
-            if char != "":
-                number_of_pieces_in_row += 1   
-        return (max(InputY1 - number_of_pieces_in_row, 0))
+        counter = 4
 
+        for char in board[InputY1]:
+            if char == "":
+                counter -= 1
+        return (max(InputY1 - counter, 0))
+
+    #moves whatever is in the first YX value into the second Y2X value and then clears the YX
     @staticmethod           
     def MakeMove(board, InputX, InputY1, InputY2):
         board[InputY2][InputX] = board[InputY1][InputX]
@@ -235,38 +258,3 @@ class Minimax():
     @LegalCheck
     def IsLegalMove(self, playercount, InputX, InputY1, InputY2, board):
         pass
-
-    def PrintMinimax(self, depth, alpha, beta, turn, maximizing_player, position, score):
-        with open("output.txt", "a") as f:  # Append to keep logs from multiple calls
-            f.write(f"Depth: {depth}\n")
-            f.write(f"Alpha: {alpha}, Beta: {beta}\n")
-            f.write(f"Current Turn: {turn}\n")
-            f.write(f"Maximizing Player: {maximizing_player}\n")
-            f.write(f"Score == {score}")
-            f.write("Position:\n")
-
-            for row in position:
-                f.write(str(row) + "\n")  # Directly writes the list format
-
-            f.write("\n" + "-" * 30 + "\n\n")  # Add a separator for readability
-    
-    def PrintChildren(self, children):
-        with open("outputChildren.txt", "a") as f:  # Append mode to keep previous logs
-            f.write("Children Positions:\n")
-
-            for i, position in enumerate(children):
-                f.write(f"Child {i + 1}:\n")
-                for row in position:
-                    f.write(str(row) + "\n")  # Write each row as a list
-
-                f.write("\n")  # Space between children for readability
-
-            f.write("-" * 30 + "\n\n")  # Separator after all children
-
-    def PrintReturning(self, depth: int, alpha: int, beta: int, max_eval: int, score):
-        with open("outputReturns.txt", "a") as f:  # Append mode to keep previous logs
-            f.write(f"Returning at Depth {depth}:\n")
-            f.write(f"Alpha: {alpha}, Beta: {beta}\n")
-            f.write(f"Max Eval: {max_eval}\n")
-            f.write(f"Score: {score}\n")
-            f.write("-" * 30 + "\n\n")  # Separator for readability
