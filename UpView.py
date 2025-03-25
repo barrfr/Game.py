@@ -46,13 +46,14 @@ class View():
 
     #represents png files
     self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    self.menu_img = pygame.image.load('MainMenu.PNG').convert_alpha()
+    self.menu_img = pygame.image.load('MainMenu.PNG').convert_alpha() #if doesnt work do /user/whatever and go all the way down
     self.ai_menu_img = pygame.image.load('AiMenu.PNG').convert_alpha()
     self.rules_menu_img = pygame.image.load('RulesMenu.PNG').convert_alpha()
     self.rules1_img = pygame.image.load('OneRules.PNG').convert_alpha()
     self.rules2_img = pygame.image.load('TwoRules.PNG').convert_alpha()
     self.rules3_img = pygame.image.load('ThreeRules.PNG').convert_alpha()
     self.rules4_img = pygame.image.load('FourRules.PNG').convert_alpha()
+
 
   
   #determines colour of grid lines of board
@@ -62,20 +63,29 @@ class View():
       return color
     
     return black
+  
+  #Draws the main menu
+  def DrawMenu(self):
+    self.screen.fill(white)
+    self.Img(0, 0, self.menu_img, self.scalewidth, self.screen, self.scaleheight) 
+    pygame.display.set_caption("UpThrust")
+    
+    pygame.display.update()
 
   #draws the CPU opponent activation menu
   def DrawAiSetup(self):
-    Img(0, 0, self.ai_menu_img, self.scalewidth, self.screen, self.scaleheight) 
+    self.Img(0, 0, self.ai_menu_img, self.scalewidth, self.screen, self.scaleheight) 
     pygame.display.update()
 
   #draws the playercount menu
   def DrawHumanSetup(self):
-    Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight) 
+    self.Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight) 
     pygame.display.update()
 
   #draws the rules menu
   def DrawRulesSetup(self):
-    Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight)
+    self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+    self.Img(0, 0, self.rules_menu_img, self.scalewidth, self.screen, self.scaleheight)
     pygame.display.update()
 
   #used to draw the ruleset for a given player count
@@ -85,18 +95,18 @@ class View():
     self.screen = pygame.display.set_mode((new_width, new_height))
     self.screen.fill((255, 255, 255))
     if value == '1':
-      Img(0, 3, self.rules1_img, 0.8, self.screen)
+      self.Img(0, 3, self.rules1_img, 0.8, self.screen)
     elif value == '2':
-      Img(0, 3, self.rules2_img, 0.812, self.screen) 
+      self.Img(0, 3, self.rules2_img, 0.812, self.screen) 
     elif value == '3':
-      Img(0, 3, self.rules3_img, 0.811, self.screen) 
+      self.Img(0, 3, self.rules3_img, 0.811, self.screen) 
     elif value == '4':
-      Img(0, 3, self.rules4_img, 0.8, self.screen) 
+      self.Img(0, 3, self.rules4_img, 0.8, self.screen) 
 
     pygame.display.update()
 
   #draws the game board
-  def DrawBoard(self, mauspos):
+  def DrawBoard(self):
     self.screen.fill(white)
     self.DrawGrid() 
     for i, character in enumerate(self.model.Board[::-1]):
@@ -106,39 +116,17 @@ class View():
 
         self.DrawPieces(x, y, char, self.model.selected_coor, 10-i, 3-j)
     pygame.display.update()
-    
-  #used to draw board pieces
-  def GreyCircle(self, n, l):
-    self.screen.fill(white)
-    self.DrawGrid() 
-    for i, character in enumerate(self.model.Board[::-1]):
-      for j, char in enumerate(character[::-1]):
-        y = self.SCREEN_HEIGHT - (self.SCREEN_HEIGHT/11)*i + self.SCREEN_HEIGHT/22 - self.SCREEN_HEIGHT/11
-        x = self.SCREEN_WIDTH - (self.SCREEN_WIDTH/4)*j - self.SCREEN_WIDTH/8 
-
-        self.DrawPieces(x, y, char, self.model.selected_coor, l, n)
-    pygame.display.update()
-
-  #Draws the main menu
-  def DrawMenu(self):
-    self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-    pygame.display.set_caption("Menu")
-    self.screen.fill(white)
-    start_button = Img(0, 0, self.menu_img, self.scalewidth, self.screen, self.scaleheight)
-    
-    pygame.display.update()
 
   #highlights a piece and its possible move
   def DrawHighlighted(self, x, y, selected, i, j):
-    if selected is None:
-      pass
-    elif selected[0] == i and selected[1] == j:
-      pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 20)
-      pygame.draw.circle(self.screen, black, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 12)
-      pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 10)
-      pygame.draw.circle(self.screen, grey, (x, y), 20)
-      pygame.draw.circle(self.screen, black, (x, y), 12)
-      pygame.display.update()
+    if selected != None:
+      if selected[0] == i and selected[1] == j:
+        pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 20)
+        pygame.draw.circle(self.screen, black, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 12)
+        pygame.draw.circle(self.screen, grey, (x, self.SCREEN_HEIGHT/22 + self.model.cpu.FindY2(i, self.model.Board)*self.SCREEN_HEIGHT/11), 10)
+        pygame.draw.circle(self.screen, grey, (x, y), 20)
+        pygame.draw.circle(self.screen, black, (x, y), 12)
+        pygame.display.update()
 
   #draws a piece
   def DrawPieces(self, x, y, character, selected, i, j):
@@ -179,18 +167,22 @@ class View():
     score_text (surface): rendered text surface for each player's score.
     score_rect (rect): rectangle object used to position each score.
     """
+    #new surface is created
     dark_surface = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
     dark_surface.set_alpha(150)
     dark_surface.fill(black)
     self.screen.blit(dark_surface, (0, 0))
     
+    #CountScores is called
     scores = sorted(self.model.CountScores(), key=lambda x: x[0], reverse=True)
 
+    #game over text is rendered
     game_over_text = self.font.render('GAME OVER', True, white)
     text_rect = game_over_text.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2))
     self.screen.blit(game_over_text, text_rect)
-    
     y_offset = text_rect.bottom + 20
+
+    #the output of CountScores is used to formulate a leaderboard of players and player scores
     for score, player_color in scores:
         score_text = self.font.render(f'{player_color}: {score}', True, white)
         score_rect = score_text.get_rect(center=(self.SCREEN_WIDTH // 2, y_offset))
@@ -202,7 +194,6 @@ class View():
   def DrawGrid(self):
     
     color = self.BarColouration()
-    barwidth = 2
     for row in range(1, 11):
       """line(surface, color, start_pos, end_pos)"""
       pygame.draw.line(self.screen, color, (0, row * self.SCREEN_HEIGHT/11), (self.SCREEN_WIDTH, row * self.SCREEN_HEIGHT/11))
@@ -215,31 +206,25 @@ class View():
       pygame.draw.line(self.screen, black, (column * (self.SCREEN_WIDTH/4)+1, 0), (column * (self.SCREEN_WIDTH/4)+1, self.SCREEN_HEIGHT))
     pygame.display.update()
 
+  def Img(self, x, y, image, scaleX, surface, scaleY=None):
+    """
+    function used to streamline the creation of an image by making it easy to adjust its size, location, relevant screen, and scale 
+    
+    Args:
+    x (real): the x coordinate of the image to be rendered at
+    y (real): the y coordinate of the image to be rendered at
+    image (variable representing file): the image manipulated and blitted to the surface
+    scaleX (real): the transform of the image width
+    surface (surface): the surface the image will be blitted to
+    scaleY (real): the transform of the image height, automatically equal to the width transform if not specified
 
-class Img():
-    def __init__(self, x, y, image, scaleX, surface, scaleY=0):
-        """
-        Class used to streamline the creation of an image by making it easy to adjust its size, location, relevant screen, and scale 
-        
-        Args:
-        x (real): the x coordinate of the image to be rendered at
-        y (real): the y coordinate of the image to be rendered at
-        image (variable representing file): the image manipulated and blitted to the surface
-        scaleX (real): the transform of the image width
-        surface (surface): the surface the image will be blitted to
-        scaleY (real): the transform of the image height, automatically equal to the width transform if not specified
-
-        List of variables:
-        width (real): the pixel width of the image fed into the function
-        height (real): the pixel height of the image fed into the function
-        """
-        width = image.get_width()
-        height = image.get_height()
-        if scaleY == 0:
-          scaleY = scaleX
-        #controls the scale of the image
-        #scale(surface, size, dest_surface=None)
-        self.image = pygame.transform.scale(image, (int(width * scaleX), int(height * scaleY))) 
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        surface.blit(self.image, (x, y))
+    List of variables:
+    width (real): the pixel width of the image fed into the function
+    height (real): the pixel height of the image fed into the function
+    """
+    width = image.get_width()
+    height = image.get_height()
+    if scaleY is None:
+      scaleY = scaleX
+    scaled_image = pygame.transform.scale(image, (int(width * scaleX), int(height * scaleY)))
+    surface.blit(scaled_image, (x, y))

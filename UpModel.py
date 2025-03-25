@@ -57,6 +57,7 @@ class UpThrustBoard():
             }
         self.AiPlayers = {1:False, 2:False, 3:False, 0:True}
         self.ColourAiPlayers = {'R':False, 'B':False, 'G':False, 'Y':True}
+
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
@@ -64,11 +65,11 @@ class UpThrustBoard():
                       ["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 
-                      ["B", "Y", "G", "R"], 
-                      ["Y", "G", "R", "B"],
-                      ["G", "R", "B", "Y"],
-                      ["R", "B", "Y", "G"]]
-        
+                      ["B", "R", "G", "Y"], 
+                      ["R", "G", "Y", "B"],
+                      ["G", "Y", "B", "R"],
+                      ["Y", "B", "R", "G"]]
+
         self.final_score = [60,
                             40,
                             30,
@@ -238,7 +239,7 @@ class UpThrustBoard():
     """ 
 
     def ResetBoard(self):
-        #used by the controller to reset the board to its iriginal starting position
+        #used by the controller to reset the board to its original starting position
         self.Board = [["", "", "", ""], 
                       ["", "", "", ""],
                       ["", "", "", ""], 

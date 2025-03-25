@@ -77,6 +77,7 @@ class Minimax():
             #if there are no child positions
             if not children: 
                 return self.EvaluatePos(position), position
+                #self.Minimax(position, depth-1, self.MaxingPlayer(currentTurn), self.cycleTurn(currentTurn), alpha, beta)
 
             #iteration function for each child
             for child in children:
@@ -90,6 +91,7 @@ class Minimax():
                 alpha = max(alpha, evaluation)
                 if beta <= alpha:
                     break
+                
             return max_eval, best_move
 
         #if not maximising player
@@ -101,6 +103,7 @@ class Minimax():
             #if there are no child positions
             if not children:
                 return self.EvaluatePos(position), position
+                #self.Minimax(position, depth-1, self.MaxingPlayer(currentTurn), self.cycleTurn(currentTurn), alpha, beta)
 
             #iteration function for each child
             for child in children:
@@ -114,6 +117,7 @@ class Minimax():
                 beta = min(beta, evaluation)
                 if beta <= alpha:
                     break
+                
             return min_eval, best_move
             
     #finds the child positions of a board in the minimax function
